@@ -1,0 +1,398 @@
+<!DOCTYPE html><html lang="zh_CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Docker 安装及基础命令介绍 | Will's Blob</title><meta name="author" content="Will"><meta name="copyright" content="Will"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="二、Docker 安装及基础命令介绍 官方网址：https:&#x2F;&#x2F;www.docker.com&#x2F;  系统版本选择： Docker目前已经支持多种操作系统的安装运行， 比如Ubuntu、CentOS、 Redhat、Debian、Fedora，甚至是还支持了Mac和Windows， 在linux系统上需要内核版本在3.10或以上，docker版本号之前一直是0.X版本或 1.X 版本， 但是从2017">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 安装及基础命令介绍">
+<meta property="og:url" content="http://example.com/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="Will&#39;s Blob">
+<meta property="og:description" content="二、Docker 安装及基础命令介绍 官方网址：https:&#x2F;&#x2F;www.docker.com&#x2F;  系统版本选择： Docker目前已经支持多种操作系统的安装运行， 比如Ubuntu、CentOS、 Redhat、Debian、Fedora，甚至是还支持了Mac和Windows， 在linux系统上需要内核版本在3.10或以上，docker版本号之前一直是0.X版本或 1.X 版本， 但是从2017">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/Avatar.jpg">
+<meta property="article:published_time" content="2025-03-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-09T10:14:07.098Z">
+<meta property="article:author" content="Will">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/Avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Docker 安装及基础命令介绍",
+  "url": "http://example.com/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/",
+  "image": "http://example.com/img/Avatar.jpg",
+  "datePublished": "2025-03-08T16:00:00.000Z",
+  "dateModified": "2025-03-09T10:14:07.098Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Will",
+      "url": "http://example.com/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.3.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Docker 安装及基础命令介绍',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/docker-01.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Will's Blob</span></a><a class="nav-page-title" href="/"><span class="site-name">Docker 安装及基础命令介绍</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Docker 安装及基础命令介绍</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-03-09T10:14:07.098Z" title="Updated 2025-03-09 18:14:07">2025-03-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Docker/">Docker</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="二、Docker-安装及基础命令介绍"><a href="#二、Docker-安装及基础命令介绍" class="headerlink" title="二、Docker 安装及基础命令介绍"></a>二、Docker 安装及基础命令介绍</h1><blockquote>
+<p>官方网址：<a target="_blank" rel="noopener" href="https://www.docker.com/">https://www.docker.com/</a></p>
+</blockquote>
+<p><strong>系统版本选择：</strong></p>
+<pre><code>Docker目前已经支持多种操作系统的安装运行，
+比如Ubuntu、CentOS、 Redhat、Debian、Fedora，甚至是还支持了Mac和Windows，
+在linux系统上需要内核版本在3.10或以上，docker版本号之前一直是0.X版本或 1.X 版本，
+但是从2017年3月1号开始改为每个季度发布一次稳版，其版本号规则也统一变更为YY.MM，
+例如17.09表示是2017年9 月份发布的，本次演示的操作系统使用Centos 7.5为例。
+</code></pre>
+<p><strong>Docker版本选择：</strong></p>
+<pre><code>Docker之前没有区分版本，但是2017年初推出(将docker更名为)新的项目Moby，
+github地址：https://github.com/moby/moby
+
+Moby项目属于Docker项目的全新上游，Docker将是一个隶属于的Moby的子产品，
+而且之后的版本之后开始区分为CE版本（社区版本）和EE（企业收费版），
+CE 社区版本和 EE 企业版本都是每个季度发布一个新版本，
+但是EE版本提供后期安全维护1年，而CE版本是4个月，本次演示的Docker版本为18.03，
+以下为官方原文： https://blog.docker.com/2017/03/docker-enterprise-edition/
+
+与kubernetes结合使用的时候，要安装经过kubernetes官方测试通过的docker版本，
+避免出现不兼容等未知的及不可预估的问题发生，kubernetes测试过的docker版本可以在github查询。
+
+具体如下：
+https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#external-dependencies
+</code></pre>
+<h2 id="2-1-apt-yum-安装docker"><a href="#2-1-apt-yum-安装docker" class="headerlink" title="2.1 apt&#x2F;yum 安装docker"></a>2.1 apt&#x2F;yum 安装docker</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">在阿里云找到docker的镜像</span><br><span class="line">https://developer.aliyun.com/mirror    </span><br><span class="line">docker-ce </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment">##########    Ubuntu apt 安装</span></span></span><br><span class="line">step 1: 安装必要的一些系统工具</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common</span><br><span class="line"></span><br><span class="line">step 2: 安装GPG证书</span><br><span class="line">curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add -</span><br><span class="line"></span><br><span class="line">Step 3: 写入软件源信息(写入阿里云docker源)</span><br><span class="line">sudo add-apt-repository &quot;deb [arch=amd64] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable&quot;</span><br><span class="line"></span><br><span class="line">Step 4: 更新并安装Docker-CE</span><br><span class="line">sudo apt-get -y update</span><br><span class="line">sudo apt-get -y install docker-ce</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment">#### 安装指定版本的Docker-CE:</span></span></span><br><span class="line">Step 1: 查找Docker-CE的版本:</span><br><span class="line">apt-cache madison docker-ce  #查看doeker仓库可以安装哪些版本</span><br><span class="line">docker-ce | 17.03.1~ce-0~ubuntu-xenial | https://mirrors.aliyun.com/docker-ce/linux/ubuntu xenial/stable amd64 Packages</span><br><span class="line"></span><br><span class="line">Step 2: 安装指定版本的Docker-CE: (VERSION例如上面的17.03.1~ce-0~ubuntu-xenial)</span><br><span class="line">sudo apt-get -y install docker-ce=[VERSION]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment">#############  CentOS7  yum安装</span></span></span><br><span class="line">rm -rf /etc/yum.repos.d/* </span><br><span class="line"></span><br><span class="line">wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo </span><br><span class="line">wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo </span><br><span class="line">wget -O /etc/yum.repos.d/docker-ce.repo  https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo </span><br><span class="line"></span><br><span class="line">yum install docker-ce </span><br><span class="line">安装kubernetes匹配的docker版本,kubernetes的代码在github托管</span><br><span class="line">https://github.com/kubernetes/kubernetes</span><br><span class="line"></span><br><span class="line">尽量使用kubernetes支持的docker版本</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-rpm-包安装-Docker"><a href="#2-2-rpm-包安装-Docker" class="headerlink" title="2.2 rpm 包安装 Docker"></a>2.2 rpm 包安装 Docker</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">官方rpm包下载地址: </span><br><span class="line">https://download.docker.com/linux/centos/7/x86_64/stable/Packages/   </span><br><span class="line"></span><br><span class="line">阿里云镜像站点下载地址： </span><br><span class="line">https://developer.aliyun.com/mirror    </span><br><span class="line"> </span><br><span class="line">二进制下载地址： </span><br><span class="line">https://download.docker.com/ </span><br><span class="line">https://mirrors.aliyun.com/docker-ce/linux/static/stable/x86_64/ </span><br><span class="line"></span><br><span class="line">阿里镜像下载地址： </span><br><span class="line">https://mirrors.aliyun.com/docker-ce/linux/centos/7/x86_64/stable/Packages/   </span><br><span class="line"></span><br><span class="line">卸载docker</span><br><span class="line">ubuntu：</span><br><span class="line">  apt remove docker docker-ce docker-ce-cli </span><br><span class="line">  docker --version 检查版本信息</span><br><span class="line">  查询相关软件包,进行卸载</span><br><span class="line">  dpkg -l | grep docker  </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-二进制安装docker"><a href="#2-3-二进制安装docker" class="headerlink" title="2.3 二进制安装docker"></a>2.3 二进制安装docker</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">下载二进制安装包,上传到服务器 </span><br><span class="line">ll /usr/local/src/</span><br><span class="line">docker-18.09.9.tgz</span><br><span class="line"></span><br><span class="line">解压二进制安装包</span><br><span class="line">tar xvf docker-18.09.9.tgz </span><br><span class="line"></span><br><span class="line">将docker的所有文件拷贝到/usr/bin目录下</span><br><span class="line">cp docker/* /usr/bin/   </span><br><span class="line"></span><br><span class="line">生成三个配置文件</span><br><span class="line">scp /lib/systemd/system/docker.service 172.18.0.123:/lib/systemd/system/docker.service </span><br><span class="line">scp /lib/systemd/system/containerd.service 172.18.0.123:/lib/systemd/system/containerd.service</span><br><span class="line">scp /lib/systemd/system/docker.socket 172.18.0.123:/lib/systemd/system/docker.socket</span><br><span class="line"></span><br><span class="line">启动containerd,并设置为开机自启</span><br><span class="line">systemctl enable --now  containerd</span><br><span class="line"></span><br><span class="line">验证是否是生成sock文件</span><br><span class="line">/run/containerd/containerd.sock= </span><br><span class="line"></span><br><span class="line">docker.socket执行文件需要用docker组启动</span><br><span class="line">创建docker组</span><br><span class="line">groupadd  docker -g 999 </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-4-验证docker信息"><a href="#2-4-验证docker信息" class="headerlink" title="2.4 验证docker信息"></a>2.4 验证docker信息</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker info</span> </span><br><span class="line"></span><br><span class="line">Client:</span><br><span class="line"> Debug Mode: false  不开启dubug</span><br><span class="line"></span><br><span class="line">Sercer: </span><br><span class="line"> Containers: 2 #当前主机的容器总数 </span><br><span class="line">  Running: 1 #有几个容器是正在运行的 </span><br><span class="line">  Paused: 0 #有几个容器是暂停的 </span><br><span class="line">  Stopped: 1 #有几个容器是停止的 </span><br><span class="line"> Images: 3 #当前服务器的镜像数 </span><br><span class="line"> Server Version: 18.09.9 #服务端版本 </span><br><span class="line"> Storage Driver: overlay2 #正在使用的存储引擎 </span><br><span class="line">  Backing Filesystem: xfs #后端文件系统，即服务器的磁盘文件系统 </span><br><span class="line">  Supports d_type: true #是否支持 d_type ,必须支持,d_type在磁盘上实现了联合挂载</span><br><span class="line">  Native Overlay Diff: true #是否支持差异数据存储,容器的差异性数据会保存在diff目录</span><br><span class="line"> Logging Driver: json-file #日志类型,以json的方式显示日志 </span><br><span class="line"> Cgroup Driver: cgroupfs #Cgroups 类型 </span><br><span class="line"> Plugins: #插件 </span><br><span class="line">  Volume: local #卷,默认本地存储</span><br><span class="line">  Network: bridge host macvlan null overlay  # overlay跨主机通信  </span><br><span class="line">           #host使用主机网络 macvlan 基于MAC地址做的一种网络技术 null 没有网络 overlay 覆盖网络</span><br><span class="line">  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog #日志类型 </span><br><span class="line"> Swarm: inactive #是否支持 swarm </span><br><span class="line"> Runtimes: runc #已安装的容器运行时 </span><br><span class="line"> Default Runtime: runc #默认使用的容器运行时 </span><br><span class="line"> Init Binary: docker-init #初始化容器的守护进程，即pid为1的进程 </span><br><span class="line"> containerd version: 894b81a4b802e4eb2a91d1ce216b8817763c29fb #版本 </span><br><span class="line"> runc version: 425e105d5a03fabd737a126ad93d62a9eeede87f # runc 版本 </span><br><span class="line"> init version: fec3683 #init 版本 </span><br><span class="line"> Security Options: #安全选项 </span><br><span class="line">  Apparmor #安全模块， https://docs.docker.com/engine/security/apparmor/  </span><br><span class="line">  seccomp  #审计(操作)，https://docs.docker.com/engine/security/seccomp/ </span><br><span class="line">   Profile: default #默认的配置文件 </span><br><span class="line"> Kernel Version: 4.15.0-55-generic #宿主机内核版本 </span><br><span class="line"> Operating System: Ubuntu 18.04.3 LTS #宿主机操作系统 </span><br><span class="line"> OSType: linux #宿主机操作系统类型 </span><br><span class="line"> Architecture: x86_64 #宿主机架构 </span><br><span class="line"> CPUs: 1 #宿主机 CPU 数量 </span><br><span class="line"> Total Memory: 1.924GiB #宿主机总内存 </span><br><span class="line"> Name: docker-server1.magedu.net #宿主机 hostname </span><br><span class="line"> ID: ZFPD:UIA5:SR6E:Y6SS:52QL:5MPT:VDY3:ATVI:QMVG:HAFF:MN74:2HPD #宿主机ID </span><br><span class="line"> Docker Root Dir: /var/lib/docker #宿主机数据保存目录 </span><br><span class="line"> Debug Mode (client): false #client 端是否开启 debug </span><br><span class="line"> Debug Mode (server): false #server 端是否开启 debug </span><br><span class="line"> Registry: https://index.docker.io/v1/ #镜像仓库 </span><br><span class="line"> Labels: #其他标签 </span><br><span class="line"> Experimental: false #是否测试版 </span><br><span class="line"> Insecure Registries: #非安全的镜像仓库 </span><br><span class="line">  127.0.0.0/8 </span><br><span class="line"> Live Restore Enabled: false #是否开启活动重启(重启 docker-daemon 不关闭容器) </span><br><span class="line"> Product License: Community Engine #产品许可信息 </span><br><span class="line"> </span><br><span class="line">WARNING: No swap limit support #系统警告信息(没有开启swap资源限制) </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-5-解决不支持swap限制警告"><a href="#2-5-解决不支持swap限制警告" class="headerlink" title="2.5 解决不支持swap限制警告"></a>2.5 解决不支持swap限制警告</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vim /etc/default/grub</span> </span><br><span class="line">添加cgroup_enable=memory swapaccount=1参数</span><br><span class="line">开启对内存的限制,开启对交换分区的限制</span><br><span class="line"></span><br><span class="line">GRUB_DEFAULT=0 </span><br><span class="line">GRUB_TIMEOUT_STYLE=hidden </span><br><span class="line">GRUB_TIMEOUT=2 </span><br><span class="line">GRUB_DISTRIBUTOR=`lsb_release -i -s 2&gt; /dev/null || echo Debian` </span><br><span class="line">GRUB_CMDLINE_LINUX_DEFAULT=&quot;&quot; </span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;net.ifnames=0 biosdevname=0 cgroup_enable=memory swapaccount=1&quot; </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">update-grub</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">reboot</span> </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-6-docker-镜像加速配置"><a href="#2-6-docker-镜像加速配置" class="headerlink" title="2.6 docker 镜像加速配置"></a>2.6 docker 镜像加速配置</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">国内下载国外的镜像有时候会很慢，因此可以更改docker配置文件添加一个加速器，</span><br><span class="line">可以通过加速器达到加速下载镜像的目的。 </span><br><span class="line"></span><br><span class="line">获取加速地址：</span><br><span class="line">浏览器打开http://cr.console.aliyun.com，</span><br><span class="line">注册或登录阿里云账号，点击左侧的镜像加速器,将会得到一个专属的加速地址，而且下面有使用配置说明.  </span><br><span class="line"></span><br><span class="line">生成配置文件：</span><br><span class="line">mkdir -p /etc/docker </span><br><span class="line">sudo tee /etc/docker/daemon.json &lt;&lt;-&#x27;EOF&#x27; </span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">&#123;</span> </span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">  <span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;https://kk3s0t8k.mirror.aliyuncs.com&quot;</span>]</span> </span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">&#125;</span> </span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">EOF</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启docker服务：</span> </span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl restart docker </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看docker信息</span></span><br><span class="line">docker info </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-7-docker配置参数详解"><a href="#2-7-docker配置参数详解" class="headerlink" title="2.7 docker配置参数详解"></a>2.7 docker配置参数详解</h2><p>&#x2F;etc&#x2F;docker&#x2F;daemon.json完整参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">docker-daemon.json各配置详解</span><br><span class="line">&#123;</span><br><span class="line">   “api-cors-header”:&quot;&quot;,  # 在引擎API中设置CORS标头</span><br><span class="line">   “authorization-plugins”:[], # 要加载的授权插件</span><br><span class="line">   “bridge”:&quot;&quot;,  # 将容器附加到网桥</span><br><span class="line">   “cgroup-parent”:&quot;&quot;,  # 为所有容器设置父cgroup</span><br><span class="line">   “cluster-store”:&quot;&quot;,  # 分布式存储后端的URL</span><br><span class="line">   “cluster-store-opts”:&#123;&#125;,  # 设置集群存储选项（默认map []）</span><br><span class="line">   “cluster-advertise”:&quot;&quot;,   # 要通告的地址或接口名称</span><br><span class="line">   “debug”: true,  # 启用调试模式，启用后，可以看到很多的启动信息。默认false</span><br><span class="line">   “default-gateway”:&quot;&quot;,     # 容器默认网关IPv4地址</span><br><span class="line">   “default-gateway-v6”:&quot;&quot;,  # 容器默认网关IPv6地址</span><br><span class="line">   “default-runtime”:“runc”, # 容器的默认OCI运行时（默认为“ runc”）</span><br><span class="line">   “default-ulimits”:&#123;&#125;,     # 容器的默认ulimit（默认[]）</span><br><span class="line">   “dns”: [“192.168.1.1”],   # 设定容器DNS的地址，在容器的 /etc/resolv.conf文件中可查看。</span><br><span class="line">   “dns-opts”: [],   # 容器 /etc/resolv.conf 文件，其他设置</span><br><span class="line">   “dns-search”: [], # 设定容器的搜索域，当设定搜索域为.example.com时，在搜索一个名为host的主机时，DNS不仅搜索host，还会搜索host.example.com。 注意：如果不设置， Docker会默认用主机上的 /etc/resolv.conf 来配置容器。</span><br><span class="line">   “exec-opts”: [],    # 运行时执行选项</span><br><span class="line">   “exec-root”:&quot;&quot;,     # 执行状态文件的根目录（默认为’/var/run/docker‘）</span><br><span class="line">   “fixed-cidr”:&quot;&quot;,    # 固定IP的IPv4子网</span><br><span class="line">   “fixed-cidr-v6”:&quot;&quot;, # 固定IP的IPv6子网</span><br><span class="line">   “data-root”:&quot;/var/lib/docker&quot;, # Docker运行时使用的根路径，默认/var/lib/docker</span><br><span class="line">   “group”: “”,    #  UNIX套接字的组（默认为“docker”）</span><br><span class="line">   “hosts”: [],    #  设置容器hosts</span><br><span class="line">   “icc”: false,   #  启用容器间通信（默认为true）</span><br><span class="line">   “ip”:“0.0.0.0”, #  绑定容器端口时的默认IP（默认0.0.0.0）</span><br><span class="line">   “iptables”: false,  #  启用iptables规则添加（默认为true）</span><br><span class="line">   “ipv6”: false,      #  启用IPv6网络</span><br><span class="line">   “ip-forward”: false,#  默认true, 启用net.ipv4.ip_forward ,进入容器后使用sysctl -a | grepnet.ipv4.ip_forward查看</span><br><span class="line">   “ip-masq”:false,    #  启用IP伪装（默认为true）</span><br><span class="line">   “labels”:[“nodeName=node-121”], #  docker主机的标签，很实用的功能,例如定义：–label nodeName=host-121</span><br><span class="line">   “live-restore”: true,  #  在容器仍在运行时启用docker的实时还原</span><br><span class="line">   “log-driver”:&quot;&quot;,  #  容器日志的默认驱动程序（默认为“ json-file”）</span><br><span class="line">   “log-level”:&quot;&quot;,   #  设置日志记录级别（“调试”，“信息”，“警告”，“错误”，“致命”）（默认为“信息”）</span><br><span class="line">   “max-concurrent-downloads”:3, #  设置每个请求的最大并发下载量（默认为3）</span><br><span class="line">   “max-concurrent-uploads”:5,   #  设置每次推送的最大同时上传数（默认为5）</span><br><span class="line">   “mtu”: 0,   #  设置容器网络MTU</span><br><span class="line">   “oom-score-adjust”:-500,   #  设置守护程序的oom_score_adj（默认值为-500）</span><br><span class="line">   “pidfile”: “”,   #  Docker守护进程的PID文件</span><br><span class="line">   “raw-logs”: false,  #  全时间戳机制</span><br><span class="line">   “selinux-enabled”: false,  #  默认 false，启用selinux支持</span><br><span class="line">   “storage-driver”:&quot;&quot;,   #  要使用的存储驱动程序</span><br><span class="line">   “swarm-default-advertise-addr”:&quot;&quot;,   #  设置默认地址或群集广告地址的接口</span><br><span class="line">   “tls”: true,   #  默认 false, 启动TLS认证开关</span><br><span class="line">   “tlscacert”: “”,   #  默认 ~/.docker/ca.pem，通过CA认证过的的certificate文件路径</span><br><span class="line">   “tlscert”: “”,   #  默认 ~/.docker/cert.pem ，TLS的certificate文件路径</span><br><span class="line">   “tlskey”: “”,   #  默认~/.docker/key.pem，TLS的key文件路径</span><br><span class="line">   “tlsverify”: true,   #  默认false，使用TLS并做后台进程与客户端通讯的验证</span><br><span class="line">   “userland-proxy”:false,   #  使用userland代理进行环回流量（默认为true）</span><br><span class="line">   “userns-remap”:&quot;&quot;,   #  用户名称空间的用户/组设置</span><br><span class="line">   “bip”:“192.168.88.0/22”,   #  ——指定网桥IP</span><br><span class="line">   “registry-mirrors”: [“https://192.498.89.232:89”],   #  设置镜像加速</span><br><span class="line">   “insecure-registries”: [“120.123.122.123:12312”],   #  设置私有仓库地址可以设为http</span><br><span class="line">   “storage-opts”: [</span><br><span class="line">   “overlay2.override_kernel_check=true”,</span><br><span class="line">   “overlay2.size=15G”</span><br><span class="line">   ],   #  存储驱动程序选项</span><br><span class="line">   “log-opts”: &#123;</span><br><span class="line">   “max-file”: “3”,</span><br><span class="line">   “max-size”: “10m”,</span><br><span class="line">   &#125;,   #  容器默认日志驱动程序选项</span><br><span class="line">   “iptables”: false   #  启用iptables规则添加（默认为true）</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-8-容器操作基础命令"><a href="#2-8-容器操作基础命令" class="headerlink" title="2.8 容器操作基础命令"></a>2.8 容器操作基础命令</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">docker run 使用命令行的方式创建容器</span></span><br><span class="line">命令格式： </span><br><span class="line">  docker run [选项] [镜像名] [shell命令/脚本] [参数] </span><br><span class="line">  docker run [参数选项] [镜像名称，必须在所有选项的后面] [/bin/echo &#x27;hello wold&#x27;]  #单次执行，没有自定义容器名称 </span><br><span class="line"> </span><br><span class="line">例： </span><br><span class="line">docker run nginx </span><br><span class="line">如果本地没有nginx镜像,会直接从官网拉取镜像,tage为latest</span><br><span class="line"></span><br><span class="line">docker run centos  /bin/echo &#x27;hello wold&#x27;  </span><br><span class="line">启动的容器在执行完shell命令就退出了</span><br></pre></td></tr></table></figure>
+
+<p><strong>从镜像启动一个容器：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">会直接进入到容器，并随机生成容器 ID 和名称 </span><br><span class="line"></span><br><span class="line">docker run -it docker.io/centos bash </span><br><span class="line">  -t TTY指定一个终端输入</span><br><span class="line">  -i 从标准终端做输入</span><br><span class="line"></span><br><span class="line">例： </span><br><span class="line">  docke run -i -t centos:7.6.1810 bash </span><br><span class="line">  退出以后容器会被回收</span><br><span class="line">  退出容器不注销 ctrl+p+q </span><br></pre></td></tr></table></figure>
+
+<p><strong>显示正在运行的容器：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">查看正在运行的容器</span><br><span class="line">docker ps        </span><br></pre></td></tr></table></figure>
+
+<p><strong>显示所有容器：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">查看包括当前正在运行以及已经关闭的所有容器： </span><br><span class="line">docker ps -a </span><br><span class="line"></span><br><span class="line">查看正在运行的容器ID </span><br><span class="line">docker ps -q </span><br></pre></td></tr></table></figure>
+
+<p><strong>删除运行中的容器：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">即使容器正在运行当中，也会被强制删除掉       </span><br><span class="line">docker rm -f 11445b3a84d3         </span><br></pre></td></tr></table></figure>
+
+<p><strong>随机映射端口： (不常用)</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker pull nginx # 下载nginx镜像 </span><br><span class="line"></span><br><span class="line">前台启动并随机映射本地端口到容器的80端口,只试用与测试</span><br><span class="line">docker run -P docker.io/nginx  </span><br></pre></td></tr></table></figure>
+
+<p><strong>查看容器端口号</strong><br>docker 默认范围,从32768开始,启用多个容器,端口号会顺序往后使用</p>
+<p>指定端口映射：</p>
+<pre><code>方式 1：本地端口81映射到容器80端口： 
+docker run  -p 81:80 --name nginx-test-port1 nginx 
+
+方式 2：本地IP:本地端口:容器端口 
+docker run  -p 192.168.10.205:82:80 --name nginx-test-port2 docker.io/nginx 
+
+方式 3：本地 IP:本地随机端口:容器端口 
+docker run  -p 192.168.10.205::80 --name nginx-test-port3 docker.io/nginx 
+
+方式 4：本机 ip:本地端口:容器端口/协议，默认为 tcp 协议 
+docker run  -p 192.168.10.205:83:80/udp  --name nginx-test-port4 docker.io/nginx 
+
+方式 5：一次性映射多个端口+协议： (常用)
+docker run  -p 86:80/tcp  -p 443:443/tcp -p 53:53/udp --name  nginx-test-port5 docker.io/nginx 
+</code></pre>
+<p><strong>查看Nginx容器访问日志:</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker logs  nginx-test-port3    #一次查看 </span><br><span class="line">docker logs -f nginx-test-port3  #持续查看 </span><br><span class="line">生产环境中 </span><br><span class="line">使用-p 指定端口启动容器</span><br><span class="line"></span><br><span class="line">例： </span><br><span class="line">  docker run  -p 80:80 nginx </span><br><span class="line">  宿主机的80端口映射到容器的80端口,通过iptables -t nat -nvL观察到,会做一个iptables 目标地址转换规则:</span><br><span class="line">  源地址是任意一个地址,访问任何一个地址的时候,目标端口是80的话,将会转发到172.17.0.2:80(nginx容器地址)</span><br><span class="line"></span><br><span class="line">通过这样的方式将访问宿主机的端口转发到容器的80上   </span><br><span class="line">iptables规则自动维护,容器有了新的映射就会加上,删除就会回收,所以端口映射不需要我们去管理 </span><br><span class="line">启用多个容器使用同一个镜像的时候,宿主机的端口不能冲突,容器中的端口可以一样,因为他是通过namespace隔离开的。</span><br><span class="line">两个容器在一定的程度上可以说是两个不同的namespace,namespace中的东西可以一样,是隔离开的</span><br><span class="line">容器的地址是由docker的dhcp分配给容器的,它能够拿到不同于当前宿主机已经运行容器的ip地址</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看容器已经映射的端口：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker port [ID/容器名称]</span><br><span class="line">docker port nginx-test-port5 </span><br></pre></td></tr></table></figure>
+
+<p><strong>自定义容器名称：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">自定义名称不可以重复</span><br><span class="line">docker run -it --name nginx-test nginx   </span><br></pre></td></tr></table></figure>
+
+<p><strong>后台启动容器：</strong></p>
+<pre><code>docker run  -d -P  --name nginx-test1   docker.io/nginx 
+9aaad776850bc06f516a770d42698e3b8f4ccce30d4b142f102ed3cb34399b31 
+
+-d 将容器放到当前终端的后台
+
+例：
+  docker run -it -d -p 172.18.0.101:80:80 -p 172.18.0.101:443:443 -p 172.18.0.101:10053:53/udp nginx
+</code></pre>
+<p><strong>创建并进入容器：</strong></p>
+<pre><code>用于测试环境
+docker run -t -i  --name test-centos2  docker.io/centos  /bin/bash  # 指定一个bash环境 
+
+[root@a8fb69e71c73 /]#  创建容器后直接进入，执行exit退出后容器关闭 
+docker run -d   --name  centos-test1 docker.io/centos  2cbbec43ba939476d798a5e1c454dd62d4d893ee12a09b587556ba6395353152 
+</code></pre>
+<p><strong>单次运行：</strong></p>
+<pre><code>对于明确是测试的,会再启动容器的时候添加--rm选项
+--rm: 单次运行一个容器
+
+容器退出后自动删除： 
+docker 	run  -it  --rm --name nginx-delete-test  docker.io/nginx 
+</code></pre>
+<p><strong>删除当前宿主机的所有容器:</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm -f `docker ps -a -q`</span><br></pre></td></tr></table></figure>
+
+<p><strong>传递运行命令：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">容器需要有一个前台运行的进程才能保持容器的运行，通过传递运行参数是一种方式，</span><br><span class="line">另外也可以在构建镜像的时候指定容器启动时运行的前台命令。 </span><br><span class="line">docker run -d centos /usr/bin/tail -f &#x27;/etc/hosts&#x27;</span><br><span class="line"></span><br><span class="line">使用tail -f 设置容器里面的守护进程</span><br><span class="line">在打镜像的时候,需要考虑启动完成一个容器以后,它的PID为1的进程是谁</span><br><span class="line">在容器中PID为1的进程就是子进程的父进程,相当于容器的守护进程</span><br><span class="line">容器中PID为1的守护进程的实现方式: </span><br><span class="line">服务类： nginx  -g  daemon off   </span><br><span class="line">        tomcat  carterlinna run </span><br><span class="line">        apache  </span><br><span class="line">        缺点: 服务不能停,服务一旦终止,容器就会被回收，容器中一旦没有PID为1的守护进程,容器就会停止</span><br><span class="line">   </span><br><span class="line">命令类:  tail -f 某个文件  </span><br><span class="line">tail -f则会一直去检查此文件,不强制终止的话就会一直占用终端,就会成为容器的守护进程</span><br><span class="line">    </span><br><span class="line">使用tail -f 设置为容器的守护进程,nginx服务等就可以进入容器进行重启,关闭等操作</span><br><span class="line">例: </span><br><span class="line">  tail -f /etc/hosts   只要tail 命令不终止,用户可以进入容器重启服务</span><br><span class="line">  tail -f 不建议检查服务的日志文件,因为tail -f 访问日志的话,每一个访问日志都会被tail -f 从磁盘中读取出来,会消耗大量的磁盘IO。因此,建议检查一个不会发生变化的文件</span><br><span class="line">  tail -f 仅用于测试环境,不可以在生产环境中使用    </span><br></pre></td></tr></table></figure>
+
+<p>在centos容器中安装一个nginx服务,尝试重启、关闭服务等操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">安装epel-release源</span>   </span><br><span class="line">yum install epel-release </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">安装nginx</span>   </span><br><span class="line">yun install nginx </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">启动nginx</span>  </span><br><span class="line">nginx </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">关闭nginx进程</span>  </span><br><span class="line">nginx -s stop </span><br><span class="line"></span><br><span class="line">容器正常运行</span><br><span class="line">在nginx容器中nginx服务的PID为1 ,无法使用kill命令终止nginx进程</span><br><span class="line">如果使用nginx -s stop 将会关闭容器  </span><br><span class="line">nginx -s reload 不会关闭容器,因为nginx的主进程不会发生变化 </span><br><span class="line"></span><br><span class="line">但是不适用于java服务,httpd等大型服务</span><br></pre></td></tr></table></figure>
+
+<p><strong>容器的启动和关闭：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop f821d0cd5a99 </span><br><span class="line">docker start f821d0cd5a99 </span><br></pre></td></tr></table></figure>
+
+<p><strong>进入到正在运行的容器：</strong><br>1：使用 attach 命令： (不常用)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">使用方式为 docker attach 容器名，attach 类似于vnc，操作会在各个容器界面显示，</span><br><span class="line">所有使用此方式进入容器的操作都是同步显示的且exit后容器将被关闭，且使用exit退出后容器关闭，</span><br><span class="line">不推荐使用，需要进入到有shell环境的容器，比如centos为例： </span><br><span class="line"></span><br><span class="line">docker run -it centos bash </span><br><span class="line">[root@63fbc2d5a3ec /]# </span><br><span class="line"></span><br><span class="line">docker  attach  63fbc2d5a3ec </span><br><span class="line">[root@63fbc2d5a3ec /]# </span><br><span class="line"></span><br><span class="line">在另外一个窗口启动测试页面是否同步：  </span><br></pre></td></tr></table></figure>
+
+<p>2：使用 exec 命令：</p>
+<pre><code>执行单次命令与进入容器，不是很推荐此方式，虽然exit退出容器还在运行    
+</code></pre>
+<p>3：使用 nsenter 命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">推荐使用此方式，nsenter命令需要通过PID进入到容器内部，</span><br><span class="line">不过可以使用 docker inspect 获取到容器的 PID: </span><br><span class="line"></span><br><span class="line">yum install util-linux #centos系统安装nsenter命令,ubuntu系统自带</span><br><span class="line"></span><br><span class="line">nsenter 使用方式: </span><br><span class="line">  nsenter [选项] [参数]</span><br><span class="line">  进入一个正在运行的PID当中去</span><br><span class="line"></span><br><span class="line">参数: </span><br><span class="line">  -a 映射所有 namespace </span><br><span class="line">  -m 映射一个文件系统namespace</span><br><span class="line">  -p 映射一个PID namespace </span><br><span class="line">  -U 映射一个用户 namespace </span><br><span class="line">  -C 映射一个cgroup namespace</span><br><span class="line">  -n 映射一个network namespace </span><br><span class="line"></span><br><span class="line">docker 	inspect命令可以查看到容器的详细信息,以json格式显示信息</span><br><span class="line"></span><br><span class="line">docker 	inspect -f 	&quot;&#123;&#123;.NetworkSettings.IPAddress&#125;&#125;&quot; 91fc190cb538  #取出容器的IP地址</span><br><span class="line">172.17.0.2 </span><br><span class="line"> </span><br><span class="line">docker inspect -f &quot;&#123;&#123;.State.Pid&#125;&#125;&quot; mydocker  #获取到某个docker容器的PID，可以通过PID进入到容器内 </span><br><span class="line"> </span><br><span class="line">docker inspect -f &quot;&#123;&#123;.State.Pid&#125;&#125;&quot; centos-test3 </span><br><span class="line">5892 </span><br><span class="line"></span><br><span class="line">nsenter -t 5892  -m -u -i -n -p </span><br><span class="line">[root@66f511bb15af /]# ls  </span><br></pre></td></tr></table></figure>
+
+<p>4：脚本方式：将nsenter命令写入到脚本进行调用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">如下：</span><br><span class="line"></span><br><span class="line">cat docker-in.sh  </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span> </span><br><span class="line">docker_in()&#123; </span><br><span class="line">  NAME_ID=$1 </span><br><span class="line">  PID=$(docker inspect -f &quot;&#123;&#123;.State.Pid&#125;&#125;&quot; $&#123;NAME_ID&#125;)  #通过inspect指令取出PID   </span><br><span class="line">  nsenter -t $&#123;PID&#125; -m -u -i -n -p   #使用nsenter -t 进入此PID的容器中</span><br><span class="line">&#125; </span><br><span class="line">docker_in $1 </span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">测试脚本是否可以正常进入到容器且退出后仍然正常运行：</span> </span><br><span class="line">[root@docker-server1 ~]# chmod  a+x docker-in.sh  </span><br><span class="line">[root@docker-server1 ~]# ./docker-in.sh  centos-test3 </span><br><span class="line">[root@66f511bb15af /]# pwd </span><br><span class="line">/ </span><br><span class="line">[root@66f511bb15af /]# exit logout </span><br><span class="line">[root@docker-server1 ~]# ./docker-in.sh  centos-test3 </span><br><span class="line">[root@66f511bb15af /]# exit </span><br><span class="line">Logout </span><br></pre></td></tr></table></figure>
+
+<p><strong>查看容器内部的 hosts 文件：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">host文件是在容器创建好之后,自动在host文件中加一条解析，将自己的ID解析成自己的IP地址，可以实现创建完场容器以后,用过ID实现访问容器本身。</span><br><span class="line"></span><br><span class="line">[root@docker-server1 ~]# docker run -i -t  --name test-centos3  docker.io/centos /bin/bash </span><br><span class="line"></span><br><span class="line">[root@056bb4928b64 /]# cat /etc/hosts     </span><br><span class="line">127.0.0.1 	localhost </span><br><span class="line">::1 localhost ip6-localhost ip6-loopback fe00::0 ip6-localnet ff00::0 ip6-mcastprefix ff02::1 ip6-allnodes ff02::2 ip6-allrouters </span><br><span class="line">172.17.0.4 	056bb4928b64 #默认会将实例的ID添加到自己的hosts文件 </span><br></pre></td></tr></table></figure>
+
+<p><strong>批量关闭正在运行的容器：</strong></p>
+<pre><code>正常关闭所有运行中的容器 
+docker stop  $(docker ps -a -q)  
+
+正常关闭单个运行中的容器
+docker stop 91ab5f72cc8d  #根据id关闭容器  
+docker stop ecstatic_perlman  #根据容器名称关闭容器
+
+启动容器
+docker start 91ab5f72cc8d 
+
+容器状态: 
+    运行中
+    已停止  
+    已退出
+    暂停
+k8s中代码更新/配置变更: 
+  开发写的代码添加一些新功能,修复bug时会更新代码
+  新创建容器--接收用户请求
+  旧版本--继续处理之前已经连接的用户请求,当这些请求处理完成之后,容器就被回收/删除
+</code></pre>
+<p><strong>批量强制关闭正在运行的容器：</strong></p>
+<pre><code>docker kill  $(docker ps -a -q)  #强制关闭所有运行中的容器 
+</code></pre>
+<p><strong>批量删除已退出的所有容器： (常用)</strong></p>
+<pre><code>docker rm -f  `docker ps -aq -f status=exited` 
+</code></pre>
+<p><strong>批量删除所有容器： (不常用)</strong></p>
+<pre><code>docker rm -f  $(docker ps -a -q) 
+</code></pre>
+<p><strong>指定容器 DNS：</strong></p>
+<pre><code>如果创建容器的时候没有指定DNS,公司内部会搭建内置DNS服务器,解决内网的自定义域名
+这些DNS负责AIP调用,以及各个组件之间的调用,会通过PowerDNS来解析servicename
+但是容器起来之后,如何让容器找到DNS解析域名? 
+
+假设宿主机的DNS为223.6.6.6,在宿主机上启动了多台容器,
+如何通过DNS解析,访问到公司的mysql数据库,域名为mysql-linux38.online.local
+
+创建docker容器的时候,强制指定DNS为公司内部DNS ,然后在公司内部DNS服务器上配置本地解析
+能解析则直接给容器返回,不能解析则往外网转发,通过公司内部服务器转发到223.6.6.6,或者运营商的DNS
+Dns服务，默认采用宿主机的dns地址
+一是将dns地址配置在宿主机 
+二是将参数配置在docker启动脚本里面 –dns=1.1.1.1 
+ 
+docker run -it --rm --dns 223.6.6.6 centos bash # 强制指定DNS
+[root@afeb628bf074 /]# cat /etc/resolv.conf  nameserver 223.6.6.6 
+</code></pre>
+<p><strong>查看容器或者镜像的明细</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 查看容器详细信息，包括容器IP地址等</span></span><br><span class="line">$ docker inspect nginx</span><br><span class="line"></span><br><span class="line"><span class="comment">## 查看镜像的明细信息</span></span><br><span class="line">$ docker inspect nginx:alpine</span><br></pre></td></tr></table></figure>
+
+<p><strong>容器数据持久化</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 挂载主机目录</span></span><br><span class="line">$ docker run --name nginx -d  -v /opt:/opt  nginx:alpine</span><br><span class="line">$ docker run --name mysql -e MYSQL_ROOT_PASSWORD=123456  -d -v /opt/mysql/:/var/lib/mysql mysql:5.7 </span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">Will</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/">http://example.com/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Docker/">Docker</a></div><div class="post-share"><div class="social-share" data-image="/img/Avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/03/09/Docker/03-%E6%B8%85%E7%90%86%20Docker%20%E5%8D%A0%E7%94%A8%E7%9A%84%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" title="清理 Docker 占用的磁盘空间"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">清理 Docker 占用的磁盘空间</div></div><div class="info-2"><div class="info-item-1">清理 Docker 占用的磁盘空间每当我们运行容器、拉取镜像、部署应用、构建自己的镜像时，我们的磁盘空间会被大量占用。 docker 占用的空间可以通过下面的命令查看： $ docker system df   TYPE 列出了docker 使用磁盘的 4 种类型：  Images：所有镜像占用的空间，包括拉取下来的镜像，和本地构建的。 Containers：运行的容器占用的空间，表示每个容器的读写层的空间。 Local Volumes：容器挂载本地数据卷的空间。 Build Cache：镜像构建过程中产生的缓存空间（只有在使用 BuildKit 时才有，Docker 18.09 以后可用）。  最后的 RECLAIMABLE 是可回收大小。 下面就分别了解一下这几个类型。 容器的磁盘占用每次创建一个容器时，都会有一些文件和目录被创建，例如：  /var/lib/docker/containers/ID目录，如果容器使用了默认的日志模式，他的所有日志都会以JSON形式保存到此目录下。 /var/lib/docker/overlay2...</div></div></div></a><a class="pagination-related" href="/2025/03/09/Docker/04-Docker%20images%20%E6%89%B9%E9%87%8F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Docker images 批量导入导出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">Docker images 批量导入导出</div></div><div class="info-2"><div class="info-item-1">Docker images 批量导入导出Docker images 批量导出脚本vim save-images.sh #!/bin/bash #Output the information of images to images.txt sudo docker image ls &gt;images.txt #Get the number of images according to the total of content&#39;s rows N=$(awk &#39;END&#123;print NR&#125;&#39; images.txt) echo The total of images is $N #Get names and tags of images for ((i=2; i&lt;=$N; i++))  do    image=$(awk &#39;NR==&quot;&#39;&quot;$i&quot;&#39;&quot; &#123;print $1&#125;&#39; images.txt)    version=$(awk...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/03/09/Docker/01-%E8%AE%A4%E8%AF%86Docker/" title="认识 Docker"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-09</div><div class="info-item-2">认识 Docker</div></div><div class="info-2"><div class="info-item-1">认识Docker统称来说，容器是一种工具，指的是可以装下其它物品的工具，以方便人类归纳放置物品、存储和异地运输，具体来说比如人类使用的衣柜、行李箱、背包等可以成为容器，但今天我们所说的容器是一种IT技术。 容器技术是虚拟化、云计算、大数据之后的一门新兴的并且是炙手可热的新技术，容器技术提高了硬件资源利用率(相对于物理机或者虚拟机)、方便了企业的业务快速横向扩容、实现了业务宕机自愈功能，因此未来数年会是一个容器愈发流行的时代，这是一个对于IT行业来说非常有影响和价值的技术，而对于IT行业的从业者来说，熟练掌握容器技术无疑是一个很有前景的行业工作机会。容器技术最早出现在freebsd叫做jail。 虚拟机是直接运行在物理机上的,可以实现嵌套虚拟化,但是性能较差,不经常使用。公司一般使用KVM+openstack对容器进行批量管理,创建以及批量维护,实现虚拟机的快速创建。KVM通过命令快速创建虚拟机,提供了虚拟机的运行环境，使用docker+k8s对容器进行管理,实现容器的快速创建,通过k8s快速创建容器,docker提供了容器的运行环境。 docker和虚拟机的差别主要在于:...</div></div></div></a><a class="pagination-related" href="/2025/03/09/Docker/03-%E6%B8%85%E7%90%86%20Docker%20%E5%8D%A0%E7%94%A8%E7%9A%84%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" title="清理 Docker 占用的磁盘空间"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-09</div><div class="info-item-2">清理 Docker 占用的磁盘空间</div></div><div class="info-2"><div class="info-item-1">清理 Docker 占用的磁盘空间每当我们运行容器、拉取镜像、部署应用、构建自己的镜像时，我们的磁盘空间会被大量占用。 docker 占用的空间可以通过下面的命令查看： $ docker system df   TYPE 列出了docker 使用磁盘的 4 种类型：  Images：所有镜像占用的空间，包括拉取下来的镜像，和本地构建的。 Containers：运行的容器占用的空间，表示每个容器的读写层的空间。 Local Volumes：容器挂载本地数据卷的空间。 Build Cache：镜像构建过程中产生的缓存空间（只有在使用 BuildKit 时才有，Docker 18.09 以后可用）。  最后的 RECLAIMABLE 是可回收大小。 下面就分别了解一下这几个类型。 容器的磁盘占用每次创建一个容器时，都会有一些文件和目录被创建，例如：  /var/lib/docker/containers/ID目录，如果容器使用了默认的日志模式，他的所有日志都会以JSON形式保存到此目录下。 /var/lib/docker/overlay2...</div></div></div></a><a class="pagination-related" href="/2025/03/09/Docker/04-Docker%20images%20%E6%89%B9%E9%87%8F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Docker images 批量导入导出"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-09</div><div class="info-item-2">Docker images 批量导入导出</div></div><div class="info-2"><div class="info-item-1">Docker images 批量导入导出Docker images 批量导出脚本vim save-images.sh #!/bin/bash #Output the information of images to images.txt sudo docker image ls &gt;images.txt #Get the number of images according to the total of content&#39;s rows N=$(awk &#39;END&#123;print NR&#125;&#39; images.txt) echo The total of images is $N #Get names and tags of images for ((i=2; i&lt;=$N; i++))  do    image=$(awk &#39;NR==&quot;&#39;&quot;$i&quot;&#39;&quot; &#123;print $1&#125;&#39; images.txt)    version=$(awk...</div></div></div></a><a class="pagination-related" href="/2025/03/09/Docker/00-Docker%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93/" title="Docker 技术总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-09</div><div class="info-item-2">Docker 技术总结</div></div><div class="info-2"><div class="info-item-1">前言统称来说，容器是一种工具，指的是可以装下其它物品的工具，以方便人类归纳放置物品、存储和异地运输，具体来说比如人类使用的衣柜、行李箱、背包等可以成为容器，但今天我们所说的容器是一种IT技术。 容器技术是虚拟化、云计算、大数据之后的一门新兴的并且是炙手可热的新技术，容器技术提高了硬件资源利用率(相对于物理机或者虚拟机)、方便了企业的业务快速横向扩容、实现了业务宕机自愈功能，因此未来数年会是一个容器愈发流行的时代，这是一个对于IT行业来说非常有影响和价值的技术，而对于IT行业的从业者来说，熟练掌握容器技术无疑是一个很有前景的行业工作机会。容器技术最早出现在freebsd叫做jail。 虚拟机是直接运行在物理机上的,可以实现嵌套虚拟化,但是性能较差,不经常使用。公司一般使用KVM+openstack对容器进行批量管理,创建以及批量维护,实现虚拟机的快速创建。KVM通过命令快速创建虚拟机,提供了虚拟机的运行环境，使用docker+k8s对容器进行管理,实现容器的快速创建,通过k8s快速创建容器,docker提供了容器的运行环境。 docker和虚拟机的差别主要在于:...</div></div></div></a><a class="pagination-related" href="/2025/03/09/Docker/05-Docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E7%BD%91%E7%BB%9C/" title="Docker 数据管理与网络"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-09</div><div class="info-item-2">Docker 数据管理与网络</div></div><div class="info-2"><div class="info-item-1">Docker 数据管理与网络七、 Docker 数据管理如果正在运行中的容器修如果生成了新的数据或者修改了现有的一个已经存在的文件内容， 那么新产生的数据将会被复制到读写层进行持久化保存，这个读写层也就是容器的工作目录， 此即“写时复制(COW) copy on write”机制   数据类型 Docker的镜像是分层设计的，镜像层是只读的，通过镜像启动的容器添加了一层可读写的文件系统，用户写入的数据都保存在这一层当中。  如果要将写入到容器的数据永久保存，则需要将容器中的数据保存到宿主机的指定目录， 目前Docker的数据类型分为两种，一是数据卷，二是数据容器，数据卷类似于挂载的一块磁盘，数据容器是将数据保存在一个容器上。 root@s1:~# docker inspect f55c55544e05 #查看指定PID的容器信息   LowerDir： image 镜像层(镜像本身，只读)  UpperDir： 容器的上层(读写)  MergedDir：容器的文件系统，使用Union FS（联合文件系统）将lowerdir和upperdir合并给容器使用。  WorkDir： ...</div></div></div></a><a class="pagination-related" href="/2025/03/09/Docker/06-Docker%20compose/" title="Docker Compose"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-09</div><div class="info-item-2">Docker Compose</div></div><div class="info-2"><div class="info-item-1">Docker 单机编排之Docker Compose九、 单机编排之Docker Compose当在宿主机启动较多的容器时候，如果都是手动操作会觉得比较麻烦而且容器出错，这个时候推荐使用docker单机编排工具docker-compose，docker-compose是docker容器的一种单机编排服务。 docker-compose是一个管理多个容器的工具，比如可以解决容器之间的依赖关系，就像启动一个nginx前端服务的时候会调用后端的tomcat，那就得先启动tomcat，但是启动tomcat容器还需要依赖数据库，那就还得先启动数据库，docker-compose就可以解决这样的嵌套依赖关系，其完全可以替代docker run对容器进行创建、启动和停止。 docker-compose项目是Docker官方的开源项目，负责实现对Docker容器集群的快速编排，docker-compose将所管理的容器分为三层，分别是工程（project），服务（service）以及容器（container）。 工程:...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/Avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Will</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>关注我</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/adong97" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">这是我的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Docker-%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">二、Docker 安装及基础命令介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-apt-yum-%E5%AE%89%E8%A3%85docker"><span class="toc-number">1.1.</span> <span class="toc-text">2.1 apt&#x2F;yum 安装docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-rpm-%E5%8C%85%E5%AE%89%E8%A3%85-Docker"><span class="toc-number">1.2.</span> <span class="toc-text">2.2 rpm 包安装 Docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%AE%89%E8%A3%85docker"><span class="toc-number">1.3.</span> <span class="toc-text">2.3 二进制安装docker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E9%AA%8C%E8%AF%81docker%E4%BF%A1%E6%81%AF"><span class="toc-number">1.4.</span> <span class="toc-text">2.4 验证docker信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E8%A7%A3%E5%86%B3%E4%B8%8D%E6%94%AF%E6%8C%81swap%E9%99%90%E5%88%B6%E8%AD%A6%E5%91%8A"><span class="toc-number">1.5.</span> <span class="toc-text">2.5 解决不支持swap限制警告</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-docker-%E9%95%9C%E5%83%8F%E5%8A%A0%E9%80%9F%E9%85%8D%E7%BD%AE"><span class="toc-number">1.6.</span> <span class="toc-text">2.6 docker 镜像加速配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-7-docker%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.7.</span> <span class="toc-text">2.7 docker配置参数详解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-8-%E5%AE%B9%E5%99%A8%E6%93%8D%E4%BD%9C%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4"><span class="toc-number">1.8.</span> <span class="toc-text">2.8 容器操作基础命令</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/01-%E8%AE%A4%E8%AF%86Docker/" title="认识 Docker">认识 Docker</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/03-%E6%B8%85%E7%90%86%20Docker%20%E5%8D%A0%E7%94%A8%E7%9A%84%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" title="清理 Docker 占用的磁盘空间">清理 Docker 占用的磁盘空间</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/" title="Docker 安装及基础命令介绍">Docker 安装及基础命令介绍</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/04-Docker%20images%20%E6%89%B9%E9%87%8F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Docker images 批量导入导出">Docker images 批量导入导出</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/00-Docker%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93/" title="Docker 技术总结">Docker 技术总结</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By Will</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.4</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.3.4"></script><script src="/js/main.js?v=5.3.4"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
