@@ -1,0 +1,497 @@
+<!DOCTYPE html><html lang="zh_CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ELK 升级方案 | Will's Blob</title><meta name="author" content="Will"><meta name="copyright" content="Will"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="ES 6.7 upgrade to 8.17.2 version✅ 必须按照 6.7 → 6.8 → 7.17 → 8.17 逐步升级 ✅ 每次升级前必须备份数据（快照） ✅ 使用 Kibana Upgrade Assistant 解决兼容性问题 ✅ 7.x → 8.x 需要注意安全性（用户名&#x2F;密码） 🔄 Logstash 6.7 → 8.17 升级指南 由于 Logstash 版本跨">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK 升级方案">
+<meta property="og:url" content="http://adong97.github.io/2025/03/11/ELK/ES_upgrade/index.html">
+<meta property="og:site_name" content="Will&#39;s Blob">
+<meta property="og:description" content="ES 6.7 upgrade to 8.17.2 version✅ 必须按照 6.7 → 6.8 → 7.17 → 8.17 逐步升级 ✅ 每次升级前必须备份数据（快照） ✅ 使用 Kibana Upgrade Assistant 解决兼容性问题 ✅ 7.x → 8.x 需要注意安全性（用户名&#x2F;密码） 🔄 Logstash 6.7 → 8.17 升级指南 由于 Logstash 版本跨">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://adong97.github.io/img/Avatar.jpg">
+<meta property="article:published_time" content="2025-03-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-11T10:31:03.159Z">
+<meta property="article:author" content="Will">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Elasticsearch">
+<meta property="article:tag" content="Logstash">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://adong97.github.io/img/Avatar.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ELK 升级方案",
+  "url": "http://adong97.github.io/2025/03/11/ELK/ES_upgrade/",
+  "image": "http://adong97.github.io/img/Avatar.jpg",
+  "datePublished": "2025-03-10T16:00:00.000Z",
+  "dateModified": "2025-03-11T10:31:03.159Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Will",
+      "url": "http://adong97.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="http://adong97.github.io/2025/03/11/ELK/ES_upgrade/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.3.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ELK 升级方案',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/blob_top.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Will's Blob</span></a><a class="nav-page-title" href="/"><span class="site-name">ELK 升级方案</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">ELK 升级方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-03-10T16:00:00.000Z" title="Created 2025-03-11 00:00:00">2025-03-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-03-11T10:31:03.159Z" title="Updated 2025-03-11 18:31:03">2025-03-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ELK/">ELK</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="ES-6-7-upgrade-to-8-17-2-version"><a href="#ES-6-7-upgrade-to-8-17-2-version" class="headerlink" title="ES 6.7 upgrade to 8.17.2 version"></a>ES 6.7 upgrade to 8.17.2 version</h1><p>✅ <strong>必须按照</strong> 6.7 → 6.8 → 7.17 → 8.17 <strong>逐步升级</strong></p>
+<p>✅ <strong>每次升级前必须备份数据（快照）</strong></p>
+<p>✅ <strong>使用 Kibana Upgrade Assistant 解决兼容性问题</strong></p>
+<p>✅ <strong>7.x → 8.x 需要注意安全性（用户名&#x2F;密码）</strong></p>
+<p><strong>🔄 Logstash 6.7 → 8.17 升级指南</strong></p>
+<p>由于 Logstash 版本跨度较大，必须 <strong>逐步升级</strong> 才能确保兼容性，推荐的升级路径如下：</p>
+<p>• <strong>6.7 → 6.8</strong></p>
+<p>• <strong>6.8 → 7.17 &#x2F;&#x2F; Pipeline 语法调整；Logstash 7.x 需要 Java 11+</strong></p>
+<p>• <strong>7.17 → 8.17</strong></p>
+<p>升级 Logstash 需要考虑 <strong>Pipeline 配置、插件兼容性、JVM 版本</strong>，以及 <strong>Elasticsearch 连接方式的变化</strong>。</p>
+<h1 id="ES-7-9-1-upgrade-to-8-17-2-version"><a href="#ES-7-9-1-upgrade-to-8-17-2-version" class="headerlink" title="ES 7.9.1 upgrade to 8.17.2 version"></a>ES 7.9.1 upgrade to 8.17.2 version</h1><pre><code>ES 产品兼容支持表：
+  https://www.elastic.co/cn/support/matrix
+
+ES Index 兼容版本表：
+  https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html#snapshot-index-compatibility
+</code></pre>
+<p>下面是从 <strong>Elasticsearch 7.9.1 升级到 8.17.2</strong> 的完整执行方案，涵盖 <strong>配置文件复制、插件检查、升级操作</strong> 以及 <strong>升级后验证</strong>。</p>
+<h1 id="1-前期准备"><a href="#1-前期准备" class="headerlink" title="1. 前期准备"></a><strong>1. 前期准备</strong></h1><h2 id="1-1-备份数据"><a href="#1-1-备份数据" class="headerlink" title="1.1 备份数据"></a><strong>1.1 备份数据</strong></h2><p>在升级前，必须完整备份 Elasticsearch 数据，以防意外情况导致数据丢失。</p>
+<p><strong>Elasticsearch 集群（3 节点）升级时的数据备份存储方式推荐方案：NFS 共享存储</strong></p>
+<p><strong>适用于：</strong></p>
+<p>• <strong>集群级别的快照备份</strong></p>
+<p>• <strong>支持多个节点访问</strong></p>
+<p>• <strong>支持跨节点恢复</strong></p>
+<p>• <strong>本地存储不足时的扩展方案</strong></p>
+<h3 id="1️⃣-配置-NFS-服务器"><a href="#1️⃣-配置-NFS-服务器" class="headerlink" title="1️⃣  配置 NFS 服务器"></a><strong>1️⃣  配置 NFS 服务器</strong></h3><p>🔹 <strong>在 NFS 服务器上，共享目录为 &#x2F;data&#x2F;es_nfs_backup （ES Master 节点）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">apt install nfs-kernel-server</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /data/es_nfs_backup</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 777 /data/es_nfs_backup</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/data/es_nfs_backup *(rw,sync,no_root_squash,no_subtree_check)&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> -a /etc/exports</span><br><span class="line"><span class="built_in">sudo</span> exportfs -a</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart nfs-server</span><br></pre></td></tr></table></figure>
+
+<p><strong>🔹 在所有 ES Node节点上, 部署 NFS 客户端</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install nfs-common -y</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /data/es_nfs_backup</span><br><span class="line"><span class="built_in">sudo</span> mount -t nfs 10.94.144.71:/data/es_nfs_backup /data/es_nfs_backup</span><br></pre></td></tr></table></figure>
+
+<p>如果希望 <strong>NFS 挂载</strong> 在每次系统重启后自动生效，需要将 NFS 挂载信息写入到 &#x2F;etc&#x2F;fstab 配置文件中。</p>
+<p><strong>🔹 添加 NFS 挂载配置</strong></p>
+<p>在文件的最后一行添加以下内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vim /etc/fstab</span><br><span class="line"></span><br><span class="line">10.94.144.71:/data/es_nfs_backup  /data/es_nfs_backup  nfs  defaults  0  0</span><br><span class="line"></span><br><span class="line">这行配置的含义：</span><br><span class="line">	•	10.94.144.71:/data/es_nfs_backup：NFS 服务器的 IP 地址和共享目录路径。</span><br><span class="line">	•	/data/es_nfs_backup：本地挂载点。</span><br><span class="line">	•	nfs：挂载类型。</span><br><span class="line">	•	defaults：挂载选项（可以根据需要调整）。</span><br><span class="line">	•	0 0：不进行备份（dump）和文件系统检查（fsck）。</span><br></pre></td></tr></table></figure>
+
+<p><strong>🔹 确认 NFS 目录是否挂载成功</strong></p>
+<p>运行以下命令来确认 NFS 目录已经挂载：</p>
+<pre><code>df -h | grep es_nfs_backup
+</code></pre>
+<p>可以看到 &#x2F;data&#x2F;es_nfs_backup 被挂载到 10.94.144.71:&#x2F;data&#x2F;es_nfs_backup</p>
+<p><strong>确保所有 ES 节点都挂载 NFS 目录，这样无论哪个节点成为 Master，都能正常执行快照操作。</strong></p>
+<h2 id="停止连接-ES-的-所有日志收集-service"><a href="#停止连接-ES-的-所有日志收集-service" class="headerlink" title="停止连接 ES 的 所有日志收集 service"></a><strong>停止连接 ES 的 所有日志收集 service</strong></h2><p>在做snapshot 之前，保证logstash, filebeat, apm 这些日志收集服务关闭，数据不再写入ES</p>
+<h2 id="2️⃣-创建快照存储库"><a href="#2️⃣-创建快照存储库" class="headerlink" title="2️⃣  创建快照存储库"></a><strong>2️⃣  创建快照存储库</strong></h2><ul>
+<li>path.repo 是 Elasticsearch <strong>允许存储快照的目录</strong>，默认 <strong>未设置</strong></li>
+<li>需要在 <strong>elasticsearch.yml</strong> 配置 <strong>path.repo: &#x2F;data&#x2F;&#x2F;data&#x2F;es_nfs_backup</strong></li>
+</ul>
+<p><strong>1. 在所有 ES 节点的 elasticsearch.yml 添加 path.repo</strong></p>
+<p>编辑 <strong>elasticsearch.yml</strong>（通常在 &#x2F;etc&#x2F;elasticsearch&#x2F;elasticsearch.yml）：</p>
+<pre><code>vim elasticsearch.yml
+
+添加以下配置：
+path.repo: [&quot;/data/es_nfs_backup&quot;] // 所有节点
+</code></pre>
+<p><strong>2. 重新启动 Elasticsearch</strong></p>
+<pre><code>sudo systemctl restart elasticsearch
+</code></pre>
+<p><strong>3. 确保目录权限正确</strong></p>
+<p>检查 &#x2F;data&#x2F;es_nfs_backup 目录是否存在，并赋予 elasticsearch 用户权限：</p>
+<pre><code>ls -ld /data/es_nfs_backup
+sudo chown -R elasticsearch:elasticsearch /data/es_nfs_backup
+sudo chmod -R 755 /data/es_nfs_backup
+</code></pre>
+<p>在 Kibana 或通过 curl 命令创建快照存储库：</p>
+<pre><code>## master 节点执行
+
+curl -XPUT &quot;http://localhost:9200/_snapshot/my_backup&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d &#39;&#123;
+       &quot;type&quot;: &quot;fs&quot;,
+       &quot;settings&quot;: &#123;
+         &quot;location&quot;: &quot;/data/es_nfs_backup&quot;
+       &#125;
+     &#125;&#39;
+</code></pre>
+<p><strong>4.创建快照</strong></p>
+<p>创建一个完整快照：</p>
+<pre><code># 创建快照
+curl -XPUT &quot;http://10.94.144.71:9200/_snapshot/my_backup/snapshot_2025030613&quot;
+</code></pre>
+<p>检查快照状态：</p>
+<pre><code># 查询快照 (健康状态)
+## 注： 观测快照是否完成
+curl -XGET &quot;http://10.94.144.71:9200/_snapshot/my_backup/snapshot_2025030613?pretty&quot;
+
+...
+      &quot;include_global_state&quot; : true,
+      &quot;state&quot; : &quot;SUCCESS&quot;,
+      &quot;start_time&quot; : &quot;2025-03-06T05:53:23.003Z&quot;,
+      &quot;start_time_in_millis&quot; : 1741240403003,
+      &quot;end_time&quot; : &quot;2025-03-06T05:55:20.259Z&quot;,
+      &quot;end_time_in_millis&quot; : 1741240520259,
+      &quot;duration_in_millis&quot; : 117256,
+      &quot;failures&quot; : [ ],
+      &quot;shards&quot; : &#123;
+        &quot;total&quot; : 435,
+        &quot;failed&quot; : 0, // failed 数量为0，表示 snapshot 完成
+        &quot;successful&quot; : 435
+      &#125;,
+
+...
+</code></pre>
+<p>确保快照成功后再进行升级。</p>
+<p>使用 ln -s 命令创建一个指向 &#x2F;data&#x2F;elasticsearch 目录的软连接，指向 &#x2F;data&#x2F;elasticsearch-7.9.1</p>
+<pre><code>sudo ln -s /data/elasticsearch-7.9.1 /data/elasticsearch
+sudo chown -R elasticsearch.elasticsearch elasticsearch 
+</code></pre>
+<p>检查 elasticsearch.service 中 bin目录 路径</p>
+<pre><code>vim  /usr/lib/systemd/system/elasticsearch.service 
+
+...
+ExecStart=/data/elasticsearch/bin/elasticsearch -d 
+...
+</code></pre>
+<h2 id="3️⃣-检查ES-环境并升级到-7-17-17-过渡"><a href="#3️⃣-检查ES-环境并升级到-7-17-17-过渡" class="headerlink" title="3️⃣ 检查ES 环境并升级到 7.17.17 过渡"></a>3️⃣ 检查ES 环境并升级到 7.17.17 过渡</h2><p><strong>1 检查 Elasticsearch 版本</strong></p>
+<p>在所有节点上执行：</p>
+<pre><code>curl -XGET &quot;http://localhost:9200&quot;
+输出示例：
+&#123;
+  &quot;name&quot;: &quot;es-node-1&quot;,
+  &quot;cluster_name&quot;: &quot;my-cluster&quot;,
+  &quot;cluster_uuid&quot;: &quot;abc123&quot;,
+  &quot;version&quot;: &#123;
+    &quot;number&quot;: &quot;7.9.1&quot;,  // check cluster version number
+    &quot;build_flavor&quot;: &quot;default&quot;,
+    &quot;build_type&quot;: &quot;tar&quot;,
+    &quot;build_hash&quot;: &quot;abc123456&quot;,
+    &quot;lucene_version&quot;: &quot;8.6.2&quot;
+  &#125;
+&#125;
+确保当前版本是 7.9.1。
+</code></pre>
+<p><strong>2 检查当前插件</strong></p>
+<p>在所有节点上运行以下命令，获取当前已安装的插件列表：</p>
+<pre><code>/usr/share/elasticsearch/bin/elasticsearch-plugin list
+</code></pre>
+<p>如果某些插件与 8.17.2 <strong>不兼容</strong>，请卸载它们：</p>
+<pre><code>/usr/share/elasticsearch/bin/elasticsearch-plugin remove &lt;插件名&gt;
+</code></pre>
+<p><strong>3 禁用分片分配</strong></p>
+<p>在升级前，防止 Elasticsearch 误判节点失效导致数据重新分配：</p>
+<pre><code>curl -XPUT &quot;http://10.94.144.71:9200/_cluster/settings&quot; \
+-H &quot;Content-Type: application/json&quot; \
+     -d &#39;&#123;
+  &quot;persistent&quot;: &#123;
+    &quot;cluster.routing.allocation.enable&quot;: &quot;none&quot;
+  &#125;
+&#125;&#39;
+</code></pre>
+<p><strong>4. 升级到 7.17.17</strong></p>
+<p>Elasticsearch <strong>不支持</strong> 直接从 7.9.1 升级到 8.17.2，所以必须先升级到 7.17.17。</p>
+<p><strong>4.1 下载 7.17.17</strong></p>
+<p>在所有节点上执行：</p>
+<pre><code>wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.17-linux-x86_64.tar.gz
+tar -xzf elasticsearch-7.17.17-linux-x86_64.tar.gz
+</code></pre>
+<p><strong>4.2 备份配置文件</strong></p>
+<p>在所有节点上备份 elasticsearch.yml，jvm.options 和 log4j2.properties：</p>
+<pre><code>cp -r /data/elasticsearch/config /etc/elasticsearch_7.9.1_configbackup
+</code></pre>
+<p><strong>4.3 停止 ElasticSearch</strong></p>
+<p>逐个停止每个节点：</p>
+<pre><code>systemctl stop elasticsearch
+
+# 注：建议先停node节点,再停master节点
+</code></pre>
+<p><strong>4.4 替换新版本</strong></p>
+<p>在所有节点上，切换elasticsearch 软链接 到 7.17.17：</p>
+<pre><code> unlink elasticsearch
+ ln -s /data/elasticsearch-7.17.17 /data/elasticsearch
+ chown -R elasticsearch.elasticsearch elasticsearch 
+</code></pre>
+<p><strong>更改配置文件</strong>（仅修改 elasticsearch.yml 中的 version 相关内容）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment">#### 注：7.9.1 upgrade to 7.17.17 config 配置没有发生变化，可以直接使用</span></span></span><br><span class="line">示例：ES-Node1</span><br><span class="line"><span class="meta prompt_">~# </span><span class="language-bash"><span class="built_in">cat</span> /data/elasticsearch-7.17.17/config/elasticsearch.yml | grep -v <span class="string">&quot;^#&quot;</span></span></span><br><span class="line">cluster.name: ABACUS-ES</span><br><span class="line">node.name: node-1</span><br><span class="line">node.master: true</span><br><span class="line">node.data: true</span><br><span class="line"></span><br><span class="line">path.data: /data/elasticsearch/data</span><br><span class="line">path.logs: /data/elasticsearch/logs</span><br><span class="line">bootstrap.memory_lock: true</span><br><span class="line"></span><br><span class="line">path.repo: [&quot;/data/es_nfs_backup&quot;]</span><br><span class="line"></span><br><span class="line">network.host: 10.94.144.71</span><br><span class="line">http.port: 9200</span><br><span class="line">transport.tcp.port: 9300</span><br><span class="line"></span><br><span class="line">discovery.seed_hosts: [&quot;10.94.144.71&quot;, &quot;10.94.144.72&quot;, &quot;10.94.144.73&quot;]</span><br><span class="line">discovery.zen.fd.ping_timeout: 1m</span><br><span class="line">discovery.zen.fd.ping_retries: 5</span><br><span class="line"></span><br><span class="line">cluster.initial_master_nodes: 10.94.144.71</span><br></pre></td></tr></table></figure>
+
+<p><strong>4.5 启动 7.17.17</strong></p>
+<p>在所有节点上启动：</p>
+<pre><code>systemctl start elasticsearch
+</code></pre>
+<p><strong>4.6 恢复快照</strong></p>
+<pre><code># 创建快照仓库
+curl -XPUT &quot;http://10.94.144.71:9200/_snapshot/my_backup&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d &#39;&#123;
+       &quot;type&quot;: &quot;fs&quot;,
+       &quot;settings&quot;: &#123;
+         &quot;location&quot;: &quot;/data/es_nfs_backup&quot; 
+       &#125;
+     &#125;&#39;
+
+# 查询快照仓库的快照
+可以在kibana stack management 中使用 restore 按钮恢复
+</code></pre>
+<p>验证升级是否成功：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询集群版本</span></span><br><span class="line">curl -XGET <span class="string">&quot;http://10.94.144.71:9200&quot;</span></span><br><span class="line">如果 version.number 是 7.17.17，说明升级成功。</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查集群数量</span></span><br><span class="line">curl -XGET <span class="string">&quot;http://10.94.144.71:9200/_cat/nodes?v&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查集群健康状态</span></span><br><span class="line">curl -XGET <span class="string">&quot;http://10.94.144.71:9200/_cluster/health?pretty&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="4️⃣-升级到-8-17-2"><a href="#4️⃣-升级到-8-17-2" class="headerlink" title="4️⃣ 升级到 8.17.2"></a>4️⃣ <strong>升级到 8.17.2</strong></h2><p><strong>1. 下载 8.17.2</strong></p>
+<pre><code>wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.17.2-linux-x86_64.tar.gz
+tar -xzf elasticsearch-8.17.2-linux-x86_64.tar.gz
+</code></pre>
+<p><strong>2. 备份 7.17.17 配置文件</strong></p>
+<pre><code>cp -r /data/elasticsearch/config /data/elasticsearch_7.17.17_configbackup
+</code></pre>
+<p><strong>3. 停止 Elasticsearch</strong></p>
+<pre><code>systemctl stop elasticsearch
+</code></pre>
+<p><strong>4. 更新软连接</strong>&#x20;</p>
+<pre><code> unlink elasticsearch
+ ln -s /data/elasticsearch-8.17.2 /data/elasticsearch
+ chown -R elasticsearch.elasticsearch elasticsearch 
+</code></pre>
+<p><strong>5.修改 elasticsearch.yml：</strong></p>
+<p>• <strong>新增</strong> 兼容 8.x 版本的设置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##### nonprod ES-Node1 8.17.2 elasticsearch.yml config</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#cat /data/elasticsearch/config/elasticsearch.yml | grep -v &quot;^#&quot;</span></span><br><span class="line"></span><br><span class="line">cluster.name: ABACUS-ES</span><br><span class="line">node.name: node-1</span><br><span class="line">node.roles: [<span class="string">&quot;data&quot;</span>, <span class="string">&quot;master&quot;</span>, <span class="string">&quot;ingest&quot;</span>]</span><br><span class="line">path.data: /data/elasticsearch/data</span><br><span class="line">path.logs: /data/elasticsearch/logs</span><br><span class="line">bootstrap.memory_lock: <span class="literal">true</span></span><br><span class="line">network.host: 10.94.144.71</span><br><span class="line">http.port: 9200</span><br><span class="line">discovery.seed_hosts: [<span class="string">&quot;10.94.144.71&quot;</span>, <span class="string">&quot;10.94.144.72&quot;</span>, <span class="string">&quot;10.94.144.73&quot;</span>]</span><br><span class="line">cluster.initial_master_nodes: [<span class="string">&quot;10.94.144.71&quot;</span>]</span><br><span class="line"></span><br><span class="line">xpack.security.http.ssl:</span><br><span class="line">  enabled: <span class="literal">false</span></span><br><span class="line">xpack.security.transport.ssl:</span><br><span class="line">  enabled: <span class="literal">false</span></span><br><span class="line">xpack.security.enabled: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">path.repo: [<span class="string">&quot;/data/es_nfs_backup&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p><strong>6. 启动 8.17.2</strong></p>
+<pre><code>systemctl start elasticsearch
+</code></pre>
+<h2 id="5️⃣-升级后验证"><a href="#5️⃣-升级后验证" class="headerlink" title="5️⃣ 升级后验证"></a>5️⃣ <strong>升级后验证</strong></h2><p><strong>1. 检查集群健康</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询集群版本</span></span><br><span class="line">curl -XGET <span class="string">&quot;http://localhost:9200&quot;</span></span><br><span class="line">如果 version.number 是 8.17.2，说明升级成功。</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查集群数量</span></span><br><span class="line">curl -XGET <span class="string">&quot;http://10.94.144.71:9200/_cat/nodes?v&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查集群健康状态</span></span><br><span class="line">curl -XGET <span class="string">&quot;http://10.94.144.71:9200/_cluster/health?pretty&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 再次创建快照仓库（与 7.17.17 仓库路径一致）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl -XPUT <span class="string">&quot;http://10.94.144.71:9200/_snapshot/my_backup&quot;</span> \</span><br><span class="line">     -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">       &quot;type&quot;: &quot;fs&quot;,</span></span><br><span class="line"><span class="string">       &quot;settings&quot;: &#123;</span></span><br><span class="line"><span class="string">         &quot;location&quot;: &quot;/data/es_nfs_backup&quot; </span></span><br><span class="line"><span class="string">       &#125;</span></span><br><span class="line"><span class="string">     &#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>3.恢复快照：</strong></p>
+<pre><code>#### 
+curl -XPOST &quot;http://10.94.144.71:9200/_snapshot/my_backup/snapshot_2025030613/_restore&quot; -H &#39;Content-Type: application/json&#39; -d &#39;&#123;
+  &quot;indices&quot;: &quot;*&quot;,
+  &quot;ignore_unavailable&quot;: true,
+  &quot;include_global_state&quot;: false
+&#125;&#39;
+</code></pre>
+<p>推荐使用 Kibana tool restore snapshot，使用默认策略，并开启 “Restore global state”</p>
+<p><img src="https://note.youdao.com/yws/res/8/WEBRESOURCE6f18dd49466d1184334cf37776f0d3e8" alt="image.png"></p>
+<p><strong>5. 结束升级</strong></p>
+<p>至此，<strong>Elasticsearch 已成功从 7.9.1 升级到 8.17.2</strong>&#x20;</p>
+<p>如果有任何问题，可以检查日志：</p>
+<pre><code>journalctl -u elasticsearch --no-pager | tail -n 50
+</code></pre>
+<h2 id="6️⃣：更新-日志收集服务-image"><a href="#6️⃣：更新-日志收集服务-image" class="headerlink" title="6️⃣：更新 日志收集服务 image"></a>6️⃣：更新 日志收集服务 image</h2><p>在将 Elasticsearch 从 <strong>7.9.1</strong> 升级到 <strong>8.17.2</strong> 的过程中，Logstash 和 Filebeat 也需要逐步升级，避免版本兼容性问题。</p>
+<p>建议采用 <strong>中间过渡版本</strong> 进行平滑升级，确保数据采集和日志处理的稳定性。</p>
+<pre><code>logstash:
+cnnprcnn3abacusacr.azurecr.cn/logstash:7.17.2 
+cnnprcnn3abacusacr.azurecr.cn/logstash:8.17.2
+
+ 
+filebeat:
+cnnprcnn3abacusacr.azurecr.cn/fedlearner/filebeat:7.17.17 
+cnnprcnn3abacusacr.azurecr.cn/fedlearner/filebeat:8.17.2 
+</code></pre>
+<p><strong>升级注意事项</strong></p>
+<p>1. <strong>版本兼容性检查</strong>：确保 Logstash 和 Filebeat 7.17.x 版本能够正常对接 7.9.1 和 8.x 的 Elasticsearch。</p>
+<p>2. <strong>配置调整</strong>：Elasticsearch 8.x 的安全性和 API 可能有变动，升级后需检查 Logstash 和 Filebeat 的配置，确保兼容性。</p>
+<p>3. <strong>滚动升级</strong>：建议先升级 Logstash 和 Filebeat 至 7.17.x，再逐步升级到 8.17.2，避免直接跨大版本导致数据采集异常。</p>
+<p>这样可以确保 Elasticsearch 版本升级后，Logstash 和 Filebeat 能够稳定运行，避免因版本不匹配导致日志采集异常。</p>
+<h2 id="x20-7️⃣：问题记录"><a href="#x20-7️⃣：问题记录" class="headerlink" title="&#x20;7️⃣：问题记录"></a>&#x20;7️⃣：问题记录</h2><pre><code>&#123;&quot;error&quot;:&#123;&quot;root_cause&quot;:[&#123;&quot;type&quot;:&quot;snapshot_restore_exception&quot;,&quot;reason&quot;:&quot;[my_backup:snapshot_2025030517/vlvCQEYgQBu7ahgiFH96cQ] cannot restore index [.ds-ilm-history-5-2025.02.25-000001] because an open index with same name already exists in the cluster. Either close or delete the existing index or restore the index under a different name by providing a rename pattern and replacement name&quot;&#125;],&quot;type&quot;:&quot;snapshot_restore_exception&quot;,&quot;reason&quot;:&quot;[my_backup:snapshot_2025030517/vlvCQEYgQBu7ahgiFH96cQ] cannot restore index [.ds-ilm-history-5-2025.02.25-000001] because an open index with same name already exists in the cluster. Either close or delete the existing index or restore the index under a different name by providing a rename pattern and replacement name&quot;&#125;,&quot;status&quot;:500&#125;
+
+“open index with same name already exists in the cluster.”
+</code></pre>
+<p>解决方法：</p>
+<pre><code>查询索引的状态：
+curl -X GET &quot;http://10.94.144.71:9200/_cat/indices/.ds-ilm-history-5-2025.02.25-000001?v&quot;
+
+关闭索引：
+curl -X POST &quot;http://10.94.144.71:9200/.ds-ilm-history-5-2025.02.25-000001/_close&quot;
+
+删除索引：
+## 关闭或删除了现有的索引，你就可以恢复快照了
+curl -X DELETE &quot;http://10.94.144.71:9200/.ds-ilm-history-5-2025.02.25-000001&quot;
+
+恢复快照：
+curl -X POST &quot;http://10.94.144.71:9200/_snapshot/my_backup/snapshot_2025030517/vlvCQEYgQBu7ahgiFH96cQ/_restore&quot;
+
+或者使用不同名称恢复
+如果你希望恢复索引时使用不同的名称，可以通过为恢复过程指定重命名模式和替换名称来实现。
+例如，使用以下命令：
+curl -X POST &quot;http://10.94.144.71:9200/_snapshot/my_backup/snapshot_2025030517/vlvCQEYgQBu7ahgiFH96cQ/_restore&quot; -H &#39;Content-Type: application/json&#39; -d &#39;&#123;
+  &quot;rename_pattern&quot;: &quot;(.+)&quot;,
+  &quot;rename_replacement&quot;: &quot;$1-restored&quot;
+&#125;&#39;
+</code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://adong97.github.io">Will</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://adong97.github.io/2025/03/11/ELK/ES_upgrade/">http://adong97.github.io/2025/03/11/ELK/ES_upgrade/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ELK/">ELK</a><a class="post-meta__tags" href="/tags/Elasticsearch/">Elasticsearch</a><a class="post-meta__tags" href="/tags/Logstash/">Logstash</a></div><div class="post-share"><div class="social-share" data-image="/img/Avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/03/09/Docker/05-Docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E7%BD%91%E7%BB%9C/" title="Docker 数据管理与网络"><img class="cover" src="/img/docker-02.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">Docker 数据管理与网络</div></div><div class="info-2"><div class="info-item-1">Docker 数据管理与网络七、 Docker 数据管理如果正在运行中的容器修如果生成了新的数据或者修改了现有的一个已经存在的文件内容， 那么新产生的数据将会被复制到读写层进行持久化保存，这个读写层也就是容器的工作目录， 此即“写时复制(COW) copy on write”机制   数据类型 Docker的镜像是分层设计的，镜像层是只读的，通过镜像启动的容器添加了一层可读写的文件系统，用户写入的数据都保存在这一层当中。  如果要将写入到容器的数据永久保存，则需要将容器中的数据保存到宿主机的指定目录， 目前Docker的数据类型分为两种，一是数据卷，二是数据容器，数据卷类似于挂载的一块磁盘，数据容器是将数据保存在一个容器上。 root@s1:~# docker inspect f55c55544e05 #查看指定PID的容器信息   LowerDir： image 镜像层(镜像本身，只读)  UpperDir： 容器的上层(读写)  MergedDir：容器的文件系统，使用Union FS（联合文件系统）将lowerdir和upperdir合并给容器使用。  WorkDir： ...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/Avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Will</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/adong97"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/adong97" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">这是我的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ES-6-7-upgrade-to-8-17-2-version"><span class="toc-number">1.</span> <span class="toc-text">ES 6.7 upgrade to 8.17.2 version</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#ES-7-9-1-upgrade-to-8-17-2-version"><span class="toc-number">2.</span> <span class="toc-text">ES 7.9.1 upgrade to 8.17.2 version</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%89%8D%E6%9C%9F%E5%87%86%E5%A4%87"><span class="toc-number">3.</span> <span class="toc-text">1. 前期准备</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%A4%87%E4%BB%BD%E6%95%B0%E6%8D%AE"><span class="toc-number">3.1.</span> <span class="toc-text">1.1 备份数据</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%EF%B8%8F%E2%83%A3-%E9%85%8D%E7%BD%AE-NFS-%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">3.1.1.</span> <span class="toc-text">1️⃣  配置 NFS 服务器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%81%9C%E6%AD%A2%E8%BF%9E%E6%8E%A5-ES-%E7%9A%84-%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86-service"><span class="toc-number">3.2.</span> <span class="toc-text">停止连接 ES 的 所有日志收集 service</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%EF%B8%8F%E2%83%A3-%E5%88%9B%E5%BB%BA%E5%BF%AB%E7%85%A7%E5%AD%98%E5%82%A8%E5%BA%93"><span class="toc-number">3.3.</span> <span class="toc-text">2️⃣  创建快照存储库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%EF%B8%8F%E2%83%A3-%E6%A3%80%E6%9F%A5ES-%E7%8E%AF%E5%A2%83%E5%B9%B6%E5%8D%87%E7%BA%A7%E5%88%B0-7-17-17-%E8%BF%87%E6%B8%A1"><span class="toc-number">3.4.</span> <span class="toc-text">3️⃣ 检查ES 环境并升级到 7.17.17 过渡</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%EF%B8%8F%E2%83%A3-%E5%8D%87%E7%BA%A7%E5%88%B0-8-17-2"><span class="toc-number">3.5.</span> <span class="toc-text">4️⃣ 升级到 8.17.2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%EF%B8%8F%E2%83%A3-%E5%8D%87%E7%BA%A7%E5%90%8E%E9%AA%8C%E8%AF%81"><span class="toc-number">3.6.</span> <span class="toc-text">5️⃣ 升级后验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6%EF%B8%8F%E2%83%A3%EF%BC%9A%E6%9B%B4%E6%96%B0-%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86%E6%9C%8D%E5%8A%A1-image"><span class="toc-number">3.7.</span> <span class="toc-text">6️⃣：更新 日志收集服务 image</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#x20-7%EF%B8%8F%E2%83%A3%EF%BC%9A%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95"><span class="toc-number">3.8.</span> <span class="toc-text"> 7️⃣：问题记录</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/11/ELK/ES_upgrade/" title="ELK 升级方案">ELK 升级方案</a><time datetime="2025-03-10T16:00:00.000Z" title="Created 2025-03-11 00:00:00">2025-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/00-Docker%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93/" title="Docker 技术总结">Docker 技术总结</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/01-%E8%AE%A4%E8%AF%86Docker/" title="认识 Docker">认识 Docker</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/" title="Docker 安装及基础命令介绍">Docker 安装及基础命令介绍</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/03-%E6%B8%85%E7%90%86%20Docker%20%E5%8D%A0%E7%94%A8%E7%9A%84%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" title="清理 Docker 占用的磁盘空间">清理 Docker 占用的磁盘空间</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By Will</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.4</a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://adong97.github.io//">blog</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.3.4"></script><script src="/js/main.js?v=5.3.4"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script id="canvas_nest" defer="defer" color="0, 223, 193" opacity="0.8" zIndex="-1" count="199" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
