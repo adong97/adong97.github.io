@@ -1,0 +1,393 @@
+<!DOCTYPE html><html lang="zh_CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Kubernetes架构及核心组件 | Will's Blob</title><meta name="author" content="Will"><meta name="copyright" content="Will"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Kubernetes架构及核心组件关于云原生云原生技术栈 容器：以docker为代表的容器运行技术。 服务网格：比如Service Mesh等。 微服务：在微服务体系结构中，一个项目是由多个松耦合且可独立部署的较小组件或服务组成。 不可变基础设施：不可变基础设施可以理解为一个应用运行所需要的基本运行需求，不可变最基本的就是指运行服务的服务器在完成部署后，就不在进行更改，比如镜像等。 声明式 API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes架构及核心组件">
+<meta property="og:url" content="http://adong97.github.io/pages/a5d9d7/index.html">
+<meta property="og:site_name" content="Will&#39;s Blob">
+<meta property="og:description" content="Kubernetes架构及核心组件关于云原生云原生技术栈 容器：以docker为代表的容器运行技术。 服务网格：比如Service Mesh等。 微服务：在微服务体系结构中，一个项目是由多个松耦合且可独立部署的较小组件或服务组成。 不可变基础设施：不可变基础设施可以理解为一个应用运行所需要的基本运行需求，不可变最基本的就是指运行服务的服务器在完成部署后，就不在进行更改，比如镜像等。 声明式 API">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://adong97.github.io/img/k8s.png">
+<meta property="article:published_time" content="2025-03-11T08:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-14T02:18:09.277Z">
+<meta property="article:author" content="Will">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://adong97.github.io/img/k8s.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kubernetes架构及核心组件",
+  "url": "http://adong97.github.io/pages/a5d9d7/",
+  "image": "http://adong97.github.io/img/k8s.png",
+  "datePublished": "2025-03-11T08:00:00.000Z",
+  "dateModified": "2025-03-14T02:18:09.277Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Will",
+      "url": "http://adong97.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="http://adong97.github.io/pages/a5d9d7/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.3.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Kubernetes架构及核心组件',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/transpancy.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/Avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">3</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/k8s.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Will's Blob</span></a><a class="nav-page-title" href="/"><span class="site-name">Kubernetes架构及核心组件</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Kubernetes架构及核心组件</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-03-11T08:00:00.000Z" title="Created 2025-03-11 16:00:00">2025-03-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-03-14T02:18:09.277Z" title="Updated 2025-03-14 10:18:09">2025-03-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kubernetes/">Kubernetes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Kubernetes架构及核心组件"><a href="#Kubernetes架构及核心组件" class="headerlink" title="Kubernetes架构及核心组件"></a>Kubernetes架构及核心组件</h1><h2 id="关于云原生"><a href="#关于云原生" class="headerlink" title="关于云原生"></a>关于云原生</h2><h3 id="云原生技术栈"><a href="#云原生技术栈" class="headerlink" title="云原生技术栈"></a>云原生技术栈</h3><ul>
+<li>容器：以docker为代表的容器运行技术。</li>
+<li>服务网格：比如Service Mesh等。</li>
+<li>微服务：在微服务体系结构中，一个项目是由多个松耦合且可独立部署的较小组件或服务组成。</li>
+<li>不可变基础设施：不可变基础设施可以理解为一个应用运行所需要的基本运行需求，不可变最基本的就是指运行服务的服务器在完成部署后，就不在进行更改，比如镜像等。</li>
+<li>声明式 API：描述应用程序的运行状态，并且由系统来决定如何来创建这个环境，例如声明一个 pod，会有 k8s 执行创建并维持副本。</li>
+</ul>
+<h3 id="云原生特征"><a href="#云原生特征" class="headerlink" title="云原生特征"></a>云原生特征</h3><ul>
+<li>符合 12 因素应用,12要素应用程序是一种构建应用程序的方法.</li>
+<li>面向微服务架构</li>
+<li>自服务敏捷架构</li>
+<li>基于 API 的协作</li>
+<li>抗脆弱性</li>
+</ul>
+<h4 id="12-因素应用"><a href="#12-因素应用" class="headerlink" title="12 因素应用"></a>12 因素应用</h4><p>1、基准代码：一份基准代码，多份部署(用同一个代码库进行版本控制，并可进行多次部署)。<br>2、依赖：显式地声明和隔离相互之间的依赖。<br>3、配置：在环境中存储配置。<br>4、后端服务：把后端服务当作一种附加资源。<br>5、构建，发布，运行：对程序执行构建或打包，并严格分离构建和运行。<br>6、进程：以一个或多个无状态进程运行应用。<br>7、端口绑定：通过端口绑定提供服务。<br>8、并发：通过进程模型进行扩展。<br>9、易处理：快速地启动，优雅地终止，最大程度上保持健壮性。<br>10、开发环境与线上环境等价：尽可能的保持开发，预发布，线上环境相同。<br>11、日志：将所有运行中进程和后端服务的输出流按照时间顺序统一收集存储和展示。<br>12、管理进程：一次性管理进程(数据备份等)应该和正常的常驻进程使用同样的运行环境。</p>
+<p><strong>云原生景观图:</strong><br><a target="_blank" rel="noopener" href="https://landscape.cncf.io/">https://landscape.cncf.io/</a></p>
+<h1 id="一、-Kubernetes概述"><a href="#一、-Kubernetes概述" class="headerlink" title="一、 Kubernetes概述"></a>一、 Kubernetes概述</h1><p>Kubernetes最初源于谷歌内部的Borg，Borg是谷歌内 部的大规模集群管理系统，负责对谷歌内部很多核心服 务的调度和管理,Borg的目的是让用户能够不必操心资 源管理的问题，让他们专注于自己的核心业务，并且做到跨多个数据中心的资源利用率最大化。</p>
+<p>官网地址：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/">https://kubernetes.io/zh/</a><br>github地址: <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes">https://github.com/kubernetes/kubernetes</a></p>
+<h2 id="1-1-纯容器模式的问题"><a href="#1-1-纯容器模式的问题" class="headerlink" title="1.1 纯容器模式的问题"></a>1.1 纯容器模式的问题</h2><ol>
+<li>业务容器数量庞大，哪些容器部署在哪些节点，使用了哪些端口，如何记录、管理，需要登录到每台机器去管理？</li>
+<li>跨主机通信，多个机器中的容器之间相互调用如何做，iptables规则手动维护？</li>
+<li>跨主机容器间互相调用，配置如何写？写死固定IP+端口？</li>
+<li>如何实现业务高可用？多个容器对外提供服务如何实现负载均衡？</li>
+<li>容器的业务中断了，如何可以感知到，感知到以后，如何自动启动新的容器?</li>
+<li>如何实现滚动升级保证业务的连续性？</li>
+<li>……</li>
+</ol>
+<h2 id="1-2-容器调度管理平台"><a href="#1-2-容器调度管理平台" class="headerlink" title="1.2 容器调度管理平台"></a>1.2 容器调度管理平台</h2><p>Docker Swarm Mesos Google Kubernetes<br>2017年开始Kubernetes凭借强大的容器集群管理功能, 逐步占据市场,目前在容器编排领域一枝独秀</p>
+<p><strong>Kubernetes官网:</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/">https://kubernetes.io/</a></p>
+<h2 id="1-3-架构图"><a href="#1-3-架构图" class="headerlink" title="1.3 架构图"></a>1.3 架构图</h2><p>如何设计一个容器管理平台？</p>
+<ul>
+<li>集群架构，管理节点分发容器到数据节点</li>
+<li>如何部署业务容器到各数据节点</li>
+<li>N个数据节点，业务容器如何选择部署在最合理的节点</li>
+<li>容器如何实现多副本，如何满足每个机器部署一个容器的模型</li>
+<li>多副本如何实现集群内负载均衡</li>
+</ul>
+<p>分布式系统，两类角色：管理节点(master)和工作节点(worker node)</p>
+<p><img src="/img/kubernetes/kubernetes_cluster.png" alt="img"></p>
+<p><strong>Master 节点：</strong><br>K8S 使用者通过命令行或者是通过 paas 平台对 API server 进行交互的<br>如果使用者是查看操作的话，API server 就会到 ETCD 数据库中进行查看数据<br>如果我们的操作是需要创建容器调度，然后 API server 就会去找 scheduler 来进行调度<br>当我们创建好容器之后，需要启动多少个容器的副本数，这个时候就会找到 Controlers 来进行维护，这四个组件就会存在于我们的 master 节点上</p>
+<p><strong>Node 节点：</strong><br>每个 node 节点上会启两个组件，Kubelet 和 Kube-proxy</p>
+<ul>
+<li><strong>Kubelet ：</strong><br>接收 master 下发的指令，并在本机上管理容器的生命周期，包括创建和删除容器、初始化容器、探针检测容器，然后每个 pod 中有至少一个容器或者多个容器，然后创建 pod 的时候 Kubelet 调用 Runc ，runc 可以分为 docker runc 或者说是其他的容器 runc</li>
+<li><strong>Kube-proxy：</strong><br>用于维护当前 node 节点上的网络规则，包括 iptables 或者 ipvs ，维护这些网络规则是，负责将规则写入至 iptables 、或者是 ipvs 实现服务映射，访问至 pod</li>
+</ul>
+<h2 id="1-4-核心组件"><a href="#1-4-核心组件" class="headerlink" title="1.4 核心组件"></a>1.4 核心组件</h2><ul>
+<li><strong>ETCD</strong>：分布式高性能键值数据库,存储整个集群的所有元数据</li>
+<li><strong>ApiServer</strong>: API服务器,集群资源访问控制入口,提供restAPI及安全访问控制</li>
+<li><strong>Scheduler</strong>：调度器,负责把业务容器调度到最合适的Node节点</li>
+<li><strong>Controller Manager</strong>：控制器管理,确保集群资源按照期望的方式运行<ul>
+<li>Replication Controller</li>
+<li>Node controller</li>
+<li>ResourceQuota Controller</li>
+<li>Namespace Controller</li>
+<li>ServiceAccount Controller</li>
+<li>Token Controller</li>
+<li>Service Controller</li>
+<li>Endpoints Controller</li>
+</ul>
+</li>
+<li><strong>kubelet</strong>：运行在每个节点上的主要的“节点代理”，脏活累活<ul>
+<li>pod 管理：kubelet 定期从所监听的数据源获取节点上 pod&#x2F;container 的期望状态（运行什么容器、运行的副本数量、网络或者存储如何配置等等），并调用对应的容器平台接口达到这个状态。</li>
+<li>容器健康检查：kubelet 创建了容器之后还要查看容器是否正常运行，如果容器运行出错，就要根据 pod 设置的重启策略进行处理.</li>
+<li>容器监控：kubelet 会监控所在节点的资源使用情况，并定时向 master 报告，资源使用数据都是通过 cAdvisor 获取的。知道整个集群所有节点的资源情况，对于 pod 的调度和正常运行至关重要</li>
+</ul>
+</li>
+<li><strong>kube-proxy</strong>：维护节点中的iptables或者ipvs规则</li>
+<li><strong>kubectl</strong>: 命令行接口，用于对 Kubernetes 集群运行命令<br>官方文档：<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/kubectl/">https://kubernetes.io/zh/docs/reference/kubectl/</a></li>
+</ul>
+<h2 id="1-5-Master节点组件说明"><a href="#1-5-Master节点组件说明" class="headerlink" title="1.5 Master节点组件说明"></a>1.5 Master节点组件说明</h2><img src="/img/kubernetes/kubernetes_masternode.png" alt="kubernetes master node" width="300" height="500">
+
+
+<h3 id="1-5-1-Api-server"><a href="#1-5-1-Api-server" class="headerlink" title="1.5.1 Api server"></a>1.5.1 Api server</h3><p>功能：身份认证、验证权限、验证指令、执行操作、返回结果<br>官方文档: <a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-apiserver/">https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-apiserver/</a></p>
+<p>Kubernetes API server 提供了k8s各类资源对象的增删改查及watch等HTTP Rest接口，这些对象包括pods、services、replicationcontrollers等，API Server为REST操作提供服务，并为集群的共享状态提供前端，所有其他组件都通过该前端进行交互。</p>
+<blockquote>
+<p>RESTful API:<br>是REST风格的网络接口，REST描述的是在网络中client和server的一种交互形式<br>REST:<br>是一种软件架构风格，或者说是一种规范，其强调HTTP应当以资源为中心，并且规范了URI的风格,规范了HTTP请求动作(GET&#x2F;PUT&#x2F;POST&#x2F;DELETE&#x2F;HEAD&#x2F;OPTIONS)的使用,具有对应的语义。</p>
+</blockquote>
+<p>API server 是所有服务的访问入口，这里包括我们的 scheduler、RC、etcd、kubelet 以及 kube-proxy 等组件都需要访问 Api server，所以这里就可想而知 Api server 的压力还是挺大的。</p>
+<ul>
+<li>该端口默认值为6443，可通过启动参数 <code>--secure-port</code> 的值来修改默认值。</li>
+<li>默认IP地址为非本地（Non-Localhost）网络端口，通过启动参数 <code>--bind-address</code> 设置该值。</li>
+<li>该端口用于接收客户端、dashboard等外部HTTPS请求。</li>
+<li>用于基于Tocken文件或客户端证书及HTTP Base的认证。</li>
+<li>用于基于策略的授权。</li>
+</ul>
+<p>为了减轻 api server 的压力，我们每个组件还可以在本地生成一定量的缓存并不需要每件事情都用到api server去进行申请。当我们的 api server 接收到请求以后，会去操作etcd（键值对数据库），etcd在我们的K8S集群中，就比较类似于在我们的 Borg 中的 paxos 这么一个键值对的数据库。Etcd 在整个 K8S 集群中起到了一个持久化的方案，并且 etcd 的官方将它定位成一个可信赖的分布式键值存储服务，Etcd 天生支持集群化，并不需要其他的组件参与进来就能够实现自己的集群化方案，所谓分布式键值存储服务也就是扩容非常方便。它能够为整个分布式集群存储一些关键数据，协助分布式集群的正常运转。</p>
+<p><strong>kubernetes API测试</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl --cacert /etc/kubernetes/ssl/ca.pem -H <span class="string">&quot;Authorization: Bearer <span class="variable">$&#123;TOKEN&#125;</span>&quot;</span> https://172.16.0.4:6443 </span><br><span class="line">curl 127.0.0.1:6443/   <span class="comment">#返回所有的API列表 </span></span><br><span class="line">curl 127.0.0.1:6443/apis   <span class="comment">#分组API </span></span><br><span class="line">curl 127.0.0.1:6443/api/v1   <span class="comment">#带具体版本号的API </span></span><br><span class="line">curl 127.0.0.1:6443/version   <span class="comment">#API版本信息 </span></span><br><span class="line">curl 127.0.0.1:6443/healthz/etcd   <span class="comment">#与etcd的心跳监测 </span></span><br><span class="line">curl 127.0.0.1:6443/apis/autoscaling/v1   <span class="comment">#API的详细信息</span></span><br><span class="line">curl 127.0.0.1:6443/metrics   <span class="comment">#指标数据</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-2-kube-scheduler"><a href="#1-5-2-kube-scheduler" class="headerlink" title="1.5.2 kube-scheduler"></a>1.5.2 kube-scheduler</h3><p>负责接收任务，选择合适的节点进行分配任务，所谓的合适就是保证这个节点有足够的资源，可以供给给pod 运行，这个节点有哪些带宽有哪些 CPU 的使用资源都是由scheduler去调度完成的。</p>
+<p><strong>kube-scheduler官方文档：</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-scheduler/">https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-scheduler/</a></p>
+<ul>
+<li>Kubernetes 调度器是一个控制面进程，负责将 Pods 指派到节点上。</li>
+<li>通过调度算法为待调度Pod列表的每个Pod从可用Node列表中选择一个最适合的Node，并将信息写入etcd中。</li>
+<li>node节点上的kubelet通过API Server监听到kubernetes Scheduler产生的Pod绑定信息，然后获取对应的Pod清单，下载Image，并启动容器。</li>
+</ul>
+<p><strong>策略：</strong></p>
+<ul>
+<li>Least Requested Priority<br>优先从备选节点列表中选择资源消耗最小的节点（CPU+内存）</li>
+<li>Calculate NodeLabel Priority<br>优先选择含有指定Label的节点。</li>
+<li>Balanced Resource Allocation<br>优先从备选节点列表中选择各项资源使用率最均衡的节点。</li>
+</ul>
+<blockquote>
+<p>先排除不符合条件的节点<br>在剩余的可用选出一个最符合条件的节点</p>
+</blockquote>
+<h3 id="1-5-3-Crontroller-Manager（控制器）"><a href="#1-5-3-Crontroller-Manager（控制器）" class="headerlink" title="1.5.3 Crontroller Manager（控制器）"></a>1.5.3 Crontroller Manager（控制器）</h3><p>维持 pod 副本的期望数，是我们 K8S 中的重要组件，Controller Manager还包括一些子控制器(副本控制器、节点控制器、命名空间控制器和服务账号控制器等)，控制器作为集群内部的管理控制中心，负责集群内的Node、Pod副本、服务端点（Endpoint）、命名空间（Namespace）、服务账号（ServiceAccount）、资源定额（ResourceQuota）的管理，当某个 Node 意外宕机时，Controller Manager会及时发现并执行自动化修复流程，确保集群中的pod副本始终处于预期的工作状态。<br><strong>官方文档：</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-controller-manager/">https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-controller-manager/</a></p>
+<ul>
+<li>controller-manager 控制器每间隔5秒检查一次节点的状态。</li>
+<li>如果 controller-manager 控制器没有收到来自节点的心跳，则将该node节点被标记为不可达。</li>
+<li>controller-manager将在标记为无法访问之前等待40秒。</li>
+<li>如果该 node节点被标记为无法访问后5分钟还没有恢复，controller-manager会删除当前node节点的所有pod并在其它可用节点重建这些pod。</li>
+</ul>
+<p><strong>pod 高可用机制:</strong></p>
+<ul>
+<li>node monitor period：节点监视周期每隔 5 秒一次</li>
+<li>node monitor grace period：节点监视器宽限期，也就是说超过 40 秒 node 不恢复的话就会把他标记为不可用</li>
+<li>pod eviction timeout：pod驱逐超时时间，然后再等 5 分钟将 pod 驱除至可用节点并进行重建</li>
+</ul>
+<h3 id="1-5-4-Etcd数据库"><a href="#1-5-4-Etcd数据库" class="headerlink" title="1.5.4 Etcd数据库"></a>1.5.4 Etcd数据库</h3><p><strong>官方文档：</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/tasks/administer-cluster/configure-upgrade-etcd/">https://kubernetes.io/zh/docs/tasks/administer-cluster/configure-upgrade-etcd/</a></p>
+<p>ETCD 是CoreOS公司开发目前是Kubernetes默认使用的key-value数据存储系统，用于保存 kubernetes 的所有集群数据，etcd 支持分布式集群功能，生产环境使用时需要为 etcd 数据提供定期备份机制。<br><img src="https://adong97.github.io/HDong.github.io/post-images/1652031038663.png" alt="img"></p>
+<p><a target="_blank" rel="noopener" href="https://etcd.io/">https://etcd.io/</a> #官网<br><a target="_blank" rel="noopener" href="https://github.com/etcd-io/etcd">https://github.com/etcd-io/etcd</a> #github</p>
+<p><strong>K8S集群中ETCD内部架构图</strong><br><img src="/img/kubernetes/etcd.png" alt="img"><br>Etcd 的架构中会发现它采用的是 http server 的形式，也就意味着这里依然是采用 http 协议进行 C&#x2F;S 的构建服务，除此以为 K8S 也是采用我们的 http 协议进行我们的 C&#x2F;S 结构的开发，因为我们的 http 协议天生支持很多种操作方式。</p>
+<p><strong>Raft：</strong><br>存放一些读写的信息，并且为了防止这些信息出现损坏还有一个 WAL ,所谓的 WAL 是一个预写日志，也就是说如果我们想对这里面的数据进行更改，WAL 就得先生产一个日志先存放一下，并且会对这些日志进行一个定时的完整加临时的备份。比如我先备份一个大版本，备份完成之后我还有一些新的修改，就会有多个子版本，然后最后在进行一次完整备份，将他转换为一个大版本。这样的好处是，首先我们不可能随时进行完整备份，因为消耗的数据量太大，那为什么还要在一定的时间内还要备份呢，防止这里的增量备份太多，我们在还原的时候太费事费时，所以采用了这么一种方案</p>
+<p>并且还会实时的将这些数据和日志写入到我们的 store（本地磁盘存 储）进行一个持久化的设置，以上就是 etcd 整个架构的说明。</p>
+<p>Etcd 我们可以直接理解为整个 K8S 集群中一个重要的存储，存储我们 K8S 集群中的一些参数信息，<strong>等于说离开了ETCD 整个 K8S 就瘫痪了。所以 etcd 是一个必须组件。</strong></p>
+<h2 id="1-6-Node节点组件说明"><a href="#1-6-Node节点组件说明" class="headerlink" title="1.6 Node节点组件说明"></a>1.6 Node节点组件说明</h2><p><img src="/img/kubernetes/kubernetes_worknode.png" alt="img"><br>在node节点中会有kube proxy、kubelet、container，也就意味着在我们的 node 节点需要安装三个软件<strong>kube proxy、kubelet、以及 docker</strong>（当然我们在node节点可以选者docker也可以选择一些其他的容器引擎）</p>
+<h3 id="1-6-1-Kubelet组件"><a href="#1-6-1-Kubelet组件" class="headerlink" title="1.6.1 Kubelet组件"></a>1.6.1 Kubelet组件</h3><p><strong>官方文档：</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kubelet/">https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kubelet/</a></p>
+<p>直接跟 docker 或者容器引擎交互实现容器的生命周期管理，可以这样理解 kubelet 接收到指令以后，先把我们K8S 发送过来的指令进行理解，理解完成以后再去把对应的指令直接转化我们的 container（容器）能够听懂的命令，并且让他去创建达到这么一个 pod 创建的流程。其实这个过程就是一个调用 container runc 的一个过程。</p>
+<p>由 api server 来分配任务，api server 会将任务写到 etcd 里面，kubelet 在通过 api server 拿到这些事件，然后再由 kube-scheduler 调度任务，最后在通过 kubelet 来执行这些任务。</p>
+<p>kubelet是运行在每个worker节点的代理组件，它会监视已分配给节点的pod，具体功能如下：</p>
+<ul>
+<li>向 master 汇报 node 节点的状态信息</li>
+<li>接受指令并在 Pod 中创建 docker 容器</li>
+<li>准备 Pod 所需的数据卷</li>
+<li>返回 pod 的运行状态</li>
+<li>在 node 节点执行容器健康检查</li>
+</ul>
+<h3 id="1-6-2-Kube-proxy"><a href="#1-6-2-Kube-proxy" class="headerlink" title="1.6.2 Kube proxy"></a>1.6.2 Kube proxy</h3><p><strong>官方文档:</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-proxy/">https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-proxy/</a></p>
+<p>Kubernetes 网络代理，运行在 node 上。它反映了 node 上 Kubernetes API 中定义的服务，并可以通过一组后端进行简单的 TCP、UDP 和 SCTP 流转发或者在一组后端进行循环 TCP、UDP 和 SCTP 转发，用户必须使用 apiserver API 创建一个服务来配置 代理，其实就是kube-proxy通过在主机上维护网络规则并执行连接转发来实现Kubernetes服务访问。</p>
+<p>Kube proxy 运行在每个节点上，监听 API Server 中服务对象的变化，再通过管理 IPtables 或者IPVS 规则 来实现网络的转发。负责写入我们的规则至 iptables 或者 ipvs 实现服务映射访问。</p>
+<p>Kube-Proxy 不同的版本可支持三种工作模式：<br>- UserSpace：k8s v1.1之前使用,k8s 1.2及以后就已经淘汰<br>- IPtables : k8s 1.1版本开始支持，1.2开始为默认<br>- IPVS: k8s 1.9引入到1.11为正式版本，需要安装ipvsadm、ipset 工具包和加载 ip_vs 内核模块</p>
+<p><img src="https://adong97.github.io/HDong.github.io/post-images/1652022162624.png" alt="img"><br>IPVS 相对 IPtables 效率会更高一些，使用 IPVS 模式需要在运行 Kube-Proxy 的节点上安装 ipvsadm、ipset 工具包和加载 ip_vs 内核模块，当 Kube-Proxy 以 IPVS 代理模式启动时，Kube-Proxy 将验证节点上是否安装了 IPVS 模块，如果未安装，则 Kube-Proxy 将回退到 IPtables 代理模式。</p>
+<p><img src="https://adong97.github.io/HDong.github.io/post-images/1652022179058.png" alt="img"><br>使用IPVS模式，Kube-Proxy会监视 Kubernetes Service 对象和 Endpoints，调用宿主机内核 Netlink 接口以相应地创建 IPVS 规则并定期与 Kubernetes Service 对象 Endpoints 对象同步 IPVS 规则，以确保 IPVS 状态与期望一致，访问服务时，流量将被重定向到其中一个后端 Pod,IPVS 使 用哈希表作为底层数据结构并在内核空间中工作，这意味着 IPVS 可以更快地重定向流量，并且在同步代理规则时具有更好的性能，此外，IPVS 为负载均衡算法提供了更多选项，例如：rr (轮询调度)、lc (最小连接数)、dh (目标哈希)、sh (源哈希)、sed (最短期望延迟)、nq(不排队调度)等。</p>
+<h2 id="1-7-核心附件"><a href="#1-7-核心附件" class="headerlink" title="1.7 核心附件"></a>1.7 核心附件</h2><h3 id="1-7-1-DNS服务"><a href="#1-7-1-DNS服务" class="headerlink" title="1.7.1 DNS服务"></a>1.7.1 DNS服务</h3><p>在Kubernetes集群中调度运行提供DNS服务的Pod，同一集群中的其他Pod可使用此DNS服务解决主机名。Kubernetes自1.11版本开始默认使用CoreDNS项目为集群提供服务注册和服务发现的动态名称解析服务，之前的版本中用到的是kube-dns项目，而SkyDNS则是更早一代的项目。</p>
+<p>文档地址: <a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/tasks/administer-cluster/dns-custom-nameservers/">https://kubernetes.io/zh/docs/tasks/administer-cluster/dns-custom-nameservers/</a></p>
+<p>DNS负责为整个集群提供DNS服务，从而实现服务之间的访问。</p>
+<pre><code>coredns 
+  git地址：  https://github.com/ coredns/coredns
+  官方网站：https://coredns.io
+
+kube-dns: 1.18
+sky-dns
+</code></pre>
+<h3 id="1-7-2-Dashboard"><a href="#1-7-2-Dashboard" class="headerlink" title="1.7.2 Dashboard"></a>1.7.2 Dashboard</h3><p>Kubernetes集群的全部功能都要基于Web的UI，来管理集群中的应用甚至是集群自身。<br>Dashboard是基于网页的Kubernetes用户界面，可以使用Dashboard获取运行在集群中的应用的概览信息，也可以创建或者修改Kubernetes资源（如 Deployment，Job， DaemonSet 等等),也可以对Deployment实现弹性伸缩、发起滚动升级、重启 Pod 或者使用向导创建新的应用。<br><strong>官方文档:</strong><br><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/tasks/access-application-cluster/web-ui-dashboard/">https://kubernetes.io/zh/docs/tasks/access-application-cluster/web-ui-dashboard/</a><br><strong>Github地址:</strong><br><a target="_blank" rel="noopener" href="https://github.com/kubernetes/dashboard">https://github.com/kubernetes/dashboard</a></p>
+<h2 id="1-8-架构设计的几点思考"><a href="#1-8-架构设计的几点思考" class="headerlink" title="1.8 架构设计的几点思考"></a>1.8 架构设计的几点思考</h2><ol>
+<li>系统各个组件分工明确(APIServer是所有请求入口，CM是控制中枢，Scheduler主管调度，而Kubelet负责运行)，配合流畅，整个运行机制一气呵成。</li>
+<li>除了配置管理和持久化组件ETCD，其他组件并不保存数据。意味<code>除ETCD外</code>其他组件都是无状态的。因此从架构设计上对kubernetes系统高可用部署提供了支撑。</li>
+<li>同时因为组件无状态，组件的升级，重启，故障等并不影响集群最终状态，只要组件恢复后就可以从中断处继续运行。</li>
+<li>各个组件和kube-apiserver之间的数据推送都是通过list-watch机制来实现。</li>
+</ol>
+<h2 id="1-9-核心组件启动方式"><a href="#1-9-核心组件启动方式" class="headerlink" title="1.9 核心组件启动方式"></a>1.9 核心组件启动方式</h2><p>静态Pod的方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## etcd、apiserver、controller-manager、kube-scheduler</span></span><br><span class="line">$ kubectl -n kube-system get pod</span><br></pre></td></tr></table></figure>
+
+<p>systemd服务方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl status kubelet</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>kubectl：二进制命令行工具</p>
+</blockquote>
+<h2 id="1-10-理解集群资源"><a href="#1-10-理解集群资源" class="headerlink" title="1.10 理解集群资源"></a>1.10 理解集群资源</h2><p>组件是为了支撑k8s平台的运行，安装好的软件。</p>
+<p>资源是如何去使用k8s的能力的定义。<br>比如，k8s可以使用Pod来管理业务应用，那么Pod就是k8s集群中的一类资源，集群中的所有资源可以提供如下方式查看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl api-resources</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-10-1-如何理解namespace"><a href="#1-10-1-如何理解namespace" class="headerlink" title="1.10.1 如何理解namespace"></a>1.10.1 如何理解namespace</h3><p>命名空间，集群内一个虚拟的概念，类似于资源池的概念，一个池子里可以有各种资源类型，绝大多数的资源都必须属于某一个namespace。集群初始化安装好之后，会默认有如下几个namespace：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get namespaces</span><br><span class="line">NAME                   STATUS   AGE</span><br><span class="line">default                Active   84m</span><br><span class="line">kube-node-lease        Active   84m</span><br><span class="line">kube-public            Active   84m</span><br><span class="line">kube-system            Active   84m</span><br><span class="line">kubernetes-dashboard   Active   71m</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>所有NAMESPACED的资源，在创建的时候都需要指定namespace，若不指定，默认会在default命名空间下</li>
+<li>相同namespace下的同类资源不可以重名，不同类型的资源可以重名</li>
+<li>不同namespace下的同类资源可以重名</li>
+<li>通常在项目使用的时候，我们会创建带有业务含义的namespace来做逻辑上的整合</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://adong97.github.io">Will</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://adong97.github.io/pages/a5d9d7/">http://adong97.github.io/pages/a5d9d7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Kubernetes/">Kubernetes</a></div><div class="post-share"><div class="social-share" data-image="/img/k8s.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/03/11/ELK/ES_upgrade/" title="ELK 升级方案"><img class="cover" src="/img/elasticsearchlogo.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">ELK 升级方案</div></div><div class="info-2"><div class="info-item-1">ES 6.7 upgrade to 8.17.2 version✅ 必须按照 6.7 → 6.8 → 7.17 → 8.17 逐步升级 ✅ 每次升级前必须备份数据（快照） ✅ 使用 Kibana Upgrade Assistant 解决兼容性问题 ✅ 7.x → 8.x 需要注意安全性（用户名&#x2F;密码） 🔄 Logstash 6.7 → 8.17 升级指南 由于 Logstash 版本跨度较大，必须 逐步升级 才能确保兼容性，推荐的升级路径如下： • 6.7 → 6.8 • 6.8 → 7.17 &#x2F;&#x2F; Pipeline 语法调整；Logstash 7.x 需要 Java 11+ • 7.17 → 8.17 升级 Logstash 需要考虑 Pipeline 配置、插件兼容性、JVM 版本，以及 Elasticsearch 连接方式的变化。 ES 7.9.1 upgrade to 8.17.2 versionES 产品兼容支持表：   https://www.elastic.co/cn/support/matrix  ES Index 兼容版本表： ...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/Avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Will</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">9</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/adong97"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/adong97" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:weixiaodong1997@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">这是我的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kubernetes%E6%9E%B6%E6%9E%84%E5%8F%8A%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">Kubernetes架构及核心组件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E4%BA%91%E5%8E%9F%E7%94%9F"><span class="toc-number">1.1.</span> <span class="toc-text">关于云原生</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%91%E5%8E%9F%E7%94%9F%E6%8A%80%E6%9C%AF%E6%A0%88"><span class="toc-number">1.1.1.</span> <span class="toc-text">云原生技术栈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%91%E5%8E%9F%E7%94%9F%E7%89%B9%E5%BE%81"><span class="toc-number">1.1.2.</span> <span class="toc-text">云原生特征</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#12-%E5%9B%A0%E7%B4%A0%E5%BA%94%E7%94%A8"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">12 因素应用</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81-Kubernetes%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">一、 Kubernetes概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E7%BA%AF%E5%AE%B9%E5%99%A8%E6%A8%A1%E5%BC%8F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 纯容器模式的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%AE%B9%E5%99%A8%E8%B0%83%E5%BA%A6%E7%AE%A1%E7%90%86%E5%B9%B3%E5%8F%B0"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 容器调度管理平台</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 架构图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-number">2.4.</span> <span class="toc-text">1.4 核心组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-Master%E8%8A%82%E7%82%B9%E7%BB%84%E4%BB%B6%E8%AF%B4%E6%98%8E"><span class="toc-number">2.5.</span> <span class="toc-text">1.5 Master节点组件说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-1-Api-server"><span class="toc-number">2.5.1.</span> <span class="toc-text">1.5.1 Api server</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-2-kube-scheduler"><span class="toc-number">2.5.2.</span> <span class="toc-text">1.5.2 kube-scheduler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-3-Crontroller-Manager%EF%BC%88%E6%8E%A7%E5%88%B6%E5%99%A8%EF%BC%89"><span class="toc-number">2.5.3.</span> <span class="toc-text">1.5.3 Crontroller Manager（控制器）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-4-Etcd%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">2.5.4.</span> <span class="toc-text">1.5.4 Etcd数据库</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-6-Node%E8%8A%82%E7%82%B9%E7%BB%84%E4%BB%B6%E8%AF%B4%E6%98%8E"><span class="toc-number">2.6.</span> <span class="toc-text">1.6 Node节点组件说明</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-1-Kubelet%E7%BB%84%E4%BB%B6"><span class="toc-number">2.6.1.</span> <span class="toc-text">1.6.1 Kubelet组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-2-Kube-proxy"><span class="toc-number">2.6.2.</span> <span class="toc-text">1.6.2 Kube proxy</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-7-%E6%A0%B8%E5%BF%83%E9%99%84%E4%BB%B6"><span class="toc-number">2.7.</span> <span class="toc-text">1.7 核心附件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-7-1-DNS%E6%9C%8D%E5%8A%A1"><span class="toc-number">2.7.1.</span> <span class="toc-text">1.7.1 DNS服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-7-2-Dashboard"><span class="toc-number">2.7.2.</span> <span class="toc-text">1.7.2 Dashboard</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-8-%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%87%A0%E7%82%B9%E6%80%9D%E8%80%83"><span class="toc-number">2.8.</span> <span class="toc-text">1.8 架构设计的几点思考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-9-%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">2.9.</span> <span class="toc-text">1.9 核心组件启动方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-10-%E7%90%86%E8%A7%A3%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90"><span class="toc-number">2.10.</span> <span class="toc-text">1.10 理解集群资源</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-10-1-%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3namespace"><span class="toc-number">2.10.1.</span> <span class="toc-text">1.10.1 如何理解namespace</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/pages/a5d9d7/" title="Kubernetes架构及核心组件">Kubernetes架构及核心组件</a><time datetime="2025-03-11T08:00:00.000Z" title="Created 2025-03-11 16:00:00">2025-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/11/ELK/ES_upgrade/" title="ELK 升级方案">ELK 升级方案</a><time datetime="2025-03-10T16:00:00.000Z" title="Created 2025-03-11 00:00:00">2025-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/01-%E8%AE%A4%E8%AF%86Docker/" title="认识 Docker">认识 Docker</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/03-%E6%B8%85%E7%90%86%20Docker%20%E5%8D%A0%E7%94%A8%E7%9A%84%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B4/" title="清理 Docker 占用的磁盘空间">清理 Docker 占用的磁盘空间</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/09/Docker/02-Docker%20%E5%AE%89%E8%A3%85%E5%8F%8A%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/" title="Docker 安装及基础命令介绍">Docker 安装及基础命令介绍</a><time datetime="2025-03-08T16:00:00.000Z" title="Created 2025-03-09 00:00:00">2025-03-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By Will</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.4</a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://adong97.github.io//">blog</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.3.4"></script><script src="/js/main.js?v=5.3.4"></script><div class="js-pjax"><script>(() => {
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = `%%{init:{ 'theme':'${theme}'}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script id="canvas_nest" defer="defer" color="0, 223, 193" opacity="0.8" zIndex="-1" count="199" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
